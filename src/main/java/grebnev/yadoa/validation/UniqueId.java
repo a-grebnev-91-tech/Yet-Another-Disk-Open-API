@@ -13,7 +13,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = UniqueIdValidator.class)
 public @interface UniqueId {
-
     String message() default "Request items couldn't contain two identical IDs";
 
     Class<?>[] groups() default {};
