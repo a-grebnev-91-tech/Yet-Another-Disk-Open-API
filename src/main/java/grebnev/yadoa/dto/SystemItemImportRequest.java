@@ -14,6 +14,7 @@ public class SystemItemImportRequest {
     @NotNull
     @UniqueId
     private List<SystemItemImport> items;
+    //TODO добавить валидацию что дата в стандарте
     @NotNull
     private LocalDateTime updateDate;
 }

@@ -14,12 +14,12 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 public class SystemItemController {
-    private final SystemItemService sevice;
+    private final SystemItemService service;
 
     @PostMapping("/imports")
     public void addItem(@RequestBody @Valid SystemItemImportRequest request) {
-        log.info("Trying to add {} items", request.getItems().size());
-        sevice.add(request);
+        log.info("Trying to add {} item(s)", request.getItems().size());
+        service.add(request);
     }
 }
 
