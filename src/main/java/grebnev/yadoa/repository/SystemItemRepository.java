@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SystemItemRepository {
-    List<SystemItemEntity> findAllById(List<String> curId);
+    List<SystemItemEntity> findAllByIdIn(List<String> id);
 
     Optional<SystemItemEntity> findById(String curId);
 

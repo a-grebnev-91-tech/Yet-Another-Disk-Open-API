@@ -16,12 +16,15 @@ public class SystemItemEntity {
     private String id;
     @Column(name = "url")
     private String url;
-    @Column(name = "date")
+    @Column(name = "update_date")
     private LocalDateTime date;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private SystemItemEntity parent;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "parent_id")
+//    private SystemItemEntity parent;
+    @Column(name = "parent_id")
+    private String parentId;
     @JoinColumn(name = "type")
+    @Enumerated(EnumType.STRING)
     private SystemItemType type;
     @JoinColumn(name = "size")
     private Long size;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,21 +23,9 @@ public class SystemItemService {
     @Transactional
     public void add(SystemItemImportRequest request) {
         for (SystemItemImport dto : request.getItems()) {
-            String curId = dto.getId();
-            String parentId = dto.getParentId();
-            Optional<SystemItemEntity> parentOptionalEntity;
-            Optional<SystemItemEntity> currentOptionalEntity;
-
-            if (parentId != null) {
-                List<SystemItemEntity> currentOrParent = repository.findAllById(List.of(curId, parentId));
-                parentOptionalEntity = getById(currentOrParent, parentId);
-                if (parentOptionalEntity.isEmpty()) throw new ValidationException("Parent for item isn't exist");
-                currentOptionalEntity = getById(currentOrParent, curId);
-            } else {
-                currentOptionalEntity = repository.findById(curId);
-            }
-
+            Optional<SystemItemEntity> currentOptionalEntity = findExistingEntity(dto);
             SystemItemEntity entity;
+            //todo добавить проверку родителя в текущем запросе
             if (currentOptionalEntity.isPresent()) {
                 entity = currentOptionalEntity.get();
                 checkTypeChangingOrThrow(entity, dto);
@@ -48,14 +37,34 @@ public class SystemItemService {
         }
     }
 
+    private Optional<SystemItemEntity> findExistingEntity(SystemItemImport dto) {
+        String curId = dto.getId();
+        String parentId = dto.getParentId();
+        Optional<SystemItemEntity> parentOptionalEntity;
+        Optional<SystemItemEntity> currentOptionalEntity;
+
+        if (parentId != null) {
+            List<String> ids = new ArrayList<>();
+            ids.add(curId);
+            ids.add(parentId);
+            List<SystemItemEntity> currentOrParent = repository.findAllByIdIn(ids);
+            parentOptionalEntity = getFromListById(currentOrParent, parentId);
+            if (parentOptionalEntity.isEmpty()) throw new ValidationException("Parent for item isn't exist");
+            currentOptionalEntity = getFromListById(currentOrParent, curId);
+        } else {
+            currentOptionalEntity = repository.findById(curId);
+        }
+        return currentOptionalEntity;
+    }
+
     private void checkTypeChangingOrThrow(SystemItemEntity entity, SystemItemImport dto) {
         if (entity.getType() != SystemItemType.valueOf(dto.getType()))
             throw new ValidationException("Item cannot change its type");
     }
 
-    private Optional<SystemItemEntity> getById(List<SystemItemEntity> currentOrParent, String parentId) {
-        for (SystemItemEntity systemItemEntity : currentOrParent) {
-            if (systemItemEntity.getId().equals(parentId)) return Optional.of(systemItemEntity);
+    private Optional<SystemItemEntity> getFromListById(List<SystemItemEntity> entities, String requiredId) {
+        for (SystemItemEntity entity : entities) {
+            if (entity.getId().equals(requiredId)) return Optional.of(entity);
         }
         return Optional.empty();
     }

@@ -1,12 +1,10 @@
 package grebnev.yadoa.dto;
 
 import grebnev.yadoa.validation.ValidItemImport;
-import grebnev.yadoa.validation.ValidItemType;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
