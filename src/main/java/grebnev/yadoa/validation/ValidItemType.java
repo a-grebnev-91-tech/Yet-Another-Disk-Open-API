@@ -9,11 +9,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+//TODO del
 @Target({METHOD, FIELD, ANNOTATION_TYPE, TYPE_USE})
 @Retention(RUNTIME)
 @Constraint(validatedBy = ItemTypeValidator.class)
 public @interface ValidItemType {
-    String message() default "Item type should be valid";
+    String message() default "Item type is invalid";
 
     Class<?>[] groups() default {};
 
