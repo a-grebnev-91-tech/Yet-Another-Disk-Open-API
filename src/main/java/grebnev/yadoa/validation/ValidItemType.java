@@ -13,7 +13,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = ItemTypeValidator.class)
 public @interface ValidItemType {
-
     String message() default "Item type should be valid";
 
     Class<?>[] groups() default {};

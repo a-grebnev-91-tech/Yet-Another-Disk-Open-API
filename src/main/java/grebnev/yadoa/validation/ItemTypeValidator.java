@@ -1,5 +1,8 @@
 package grebnev.yadoa.validation;
 
+import grebnev.yadoa.service.SystemItemType;
+import org.apache.commons.lang3.EnumUtils;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -9,6 +12,6 @@ public class ItemTypeValidator implements ConstraintValidator<ValidItemType, Str
         if (s == null) {
             return false;
         }
-
+        return EnumUtils.isValidEnum(SystemItemType.class, s);
     }
 }
