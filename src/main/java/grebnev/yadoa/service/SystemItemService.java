@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,121 +22,72 @@ public class SystemItemService {
 
     @Transactional
     public void add(SystemItemImportRequest request) {
-        Set<String> idsFromRequest = getIdsFromRequest(request);
-        List<SystemItemEntity> existingEntities = repository.findAllById(idsFromRequest);
+        Map<String, Optional<SystemItemImport>> idsFromRequest = getIdsFromRequest(request);
+        Map<String, SystemItemEntity> existingEntities = repository.findAllById(idsFromRequest.keySet()).stream()
+                .collect(Collectors.toMap(SystemItemEntity::getId, Function.identity()));
         List<SystemItemEntity> entitiesToSave = getEntitiesToSave(request, idsFromRequest, existingEntities);
         repository.saveAll(entitiesToSave);
     }
 
-
-    private void checkParentIsPresentOrThrow(String parentId, Set<String> idsFromRequest, Set<String> existingIds) {
-        if (parentId == null) return;
-        if (existingIds.contains(parentId)) {
-
+    private void checkParentOrThrow(
+            String parentId,
+            Map<String, Optional<SystemItemImport>> idsFromRequest,
+            Map<String, SystemItemEntity> existingIds
+    ) {
+        if (parentId == null) {
+            return;
         }
-        if (idsFromRequest.contains(parentId)) return;
-        throw new ValidationException("Parent for item isn't exist");
+        //check parent existing & correct type
+        if (existingIds.containsKey(parentId)) {
+            SystemItemEntity parent = existingIds.get(parentId);
+            checkParentTypeOrThrow(parent.getType());
+            return;
+        }
+        //check if parent is present in import and type is FOLDER
+        Optional<SystemItemImport> optionalParent = idsFromRequest.get(parentId);
+        if (optionalParent.isPresent()) {
+            SystemItemImport parent = optionalParent.get();
+            checkParentTypeOrThrow(SystemItemType.valueOf(parent.getType()));
+        } else {
+            throw new ValidationException("Parent for item isn't exist");
+        }
     }
 
-    private void checkTypeChangingOrThrow(SystemItemImport dto, List<SystemItemEntity> entities) {
-        String curId = dto.getId();
-        for (SystemItemEntity entity : entities) {
-            if (entity.getId().equals(curId)) {
-                if (!dto.getType().equals(entity.getType().name()))
-                    throw new ValidationException("Parent for item isn't exist");
-                ;
-            }
-        }
+    private void checkParentTypeOrThrow(SystemItemType type) {
+        if (type.equals(SystemItemType.FILE)) throw new ValidationException("Parent for item is FILE");
     }
 
-    private Set<String> getExistingIds(List<SystemItemEntity> existingEntities) {
-        Set<String> result = new HashSet<>(existingEntities.size() * 2);
-        for (SystemItemEntity existingEntity : existingEntities) {
-            result.add(existingEntity.getId());
-            String parentId = existingEntity.getParentId();
-            if (parentId != null) result.add(parentId);
-        }
-        return result;
+    private void checkTypeChangingOrThrow(SystemItemImport dto, Map<String, SystemItemEntity> entities) {
+        SystemItemEntity entity = entities.get(dto.getId());
+        if (!dto.getType().equals(entity.getType().name()))
+            throw new ValidationException("Detected attempt to change item Type");
     }
 
     private List<SystemItemEntity> getEntitiesToSave(
             SystemItemImportRequest request,
-            Set<String> idsFromRequest,
-            List<SystemItemEntity> existingEntities
+            Map<String, Optional<SystemItemImport>> idsFromRequest,
+            Map<String, SystemItemEntity> existingEntities
     ) {
         List<SystemItemEntity> entitiesToSave = new ArrayList<>();
-        Set<String> existingIds = getExistingIds(existingEntities);
         for (SystemItemImport dto : request.getItems()) {
             String curId = dto.getId();
             String parentId = dto.getParentId();
-            checkParentIsPresentOrThrow(parentId, idsFromRequest, existingIds);
-            if (existingIds.contains(curId)) checkTypeChangingOrThrow(dto, existingEntities);
+            checkParentOrThrow(parentId, idsFromRequest, existingEntities);
+            if (existingEntities.containsKey(curId)) checkTypeChangingOrThrow(dto, existingEntities);
             entitiesToSave.add(mapper.dtoToEntity(dto, request.getUpdateDate()));
         }
         return entitiesToSave;
     }
 
-    private Set<String> getIdsFromRequest(SystemItemImportRequest request) {
-        Set<String> idsFromRequest = new HashSet<>(request.getItems().size() * 2);
+    private Map<String, Optional<SystemItemImport>> getIdsFromRequest(SystemItemImportRequest request) {
+        Map<String, Optional<SystemItemImport>> idsFromRequest = new HashMap<>(request.getItems().size() * 2);
         for (SystemItemImport dto : request.getItems()) {
-            idsFromRequest.add(dto.getId());
+            idsFromRequest.put(dto.getId(), Optional.of(dto));
             String parentId = dto.getParentId();
-            if (parentId != null) idsFromRequest.add(parentId);
+            if (parentId != null && !idsFromRequest.containsKey(parentId)) {
+                idsFromRequest.put(parentId, Optional.empty());
+            }
         }
         return idsFromRequest;
     }
-
-    //    private Map<String, SystemItemEntity> entityToCreate;
-//    private Map<String, SystemItemEntity> otherEntitiesToCreate;
-//    private Map<String, SystemItemEntity> existingEntities;
-//    private Set<Object> idsFromRequest;
-    //        for (SystemItemImport item : imports) {
-//        idsFromRequest = new HashSet<>(imports.size());
-//        existingEntities = new HashMap<>(imports.size());
-//        entityToCreate = new HashMap<>(imports.size());
-//    private void fillMapsToCreate(List<SystemItemImport> imports) {
-//
-////    }
-////
-//        fillEntitiesToSave(entitiesToSave, )
-//        ArrayList<SystemItemEntity> entitiesToSave = new ArrayList<>(imports.size());
-//        }
-//            existingEntities.put(curId, existingEntity);
-//            entityToCreate.remove(curId);
-//            String curId = existingEntity.getId();
-//        for (SystemItemEntity existingEntity : entitiesFromRepo) {
-//        List<SystemItemEntity> entitiesFromRepo = repository.findAllById(entityToCreate.keySet());
-//        fillMapsToCreate(imports);
-//        List<SystemItemImport> imports = request.getItems();
-//    private List<SystemItemEntity> convertRequestToEntities(SystemItemImportRequest request) {
-
-//            String parentId = item.getParentId();
-//            String curId = item.getId();
-//            if (parentId != null) {
-//                entityToCreate.put(parentId, null);
-//            }
-//            entityToCreate.put(curId, null);
-//
-//        }
-//    }
-//
-//    private Set<String> getParentsIdsFromRequest(SystemItemImportRequest request) {
-//        return request.getItems().stream()
-//                .map(SystemItemImport::getParentId)
-//                .filter(Objects::nonNull)
-//                .collect(Collectors.toSet());
-
-//    }
-
-//    private void checkTypeChangingOrThrow(SystemItemEntity entity, SystemItemImport dto) {
-//        if (entity.getType() != SystemItemType.valueOf(dto.getType()))
-//            throw new ValidationException("Item cannot change its type");
-//    }
-
-//    private Optional<SystemItemEntity> getFromListById(List<SystemItemEntity> entities, String requiredId) {
-//        for (SystemItemEntity entity : entities) {
-//            if (entity.getId().equals(requiredId)) return Optional.of(entity);
-//        }
-//        return Optional.empty();
-//    }
 }
