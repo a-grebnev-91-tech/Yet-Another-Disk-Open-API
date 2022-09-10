@@ -21,5 +21,8 @@ public class SystemItemController {
         log.info("Trying to add {} item(s)", request.getItems().size());
         service.add(request);
     }
+
+    //  /delete/{id}:
+
 }
 

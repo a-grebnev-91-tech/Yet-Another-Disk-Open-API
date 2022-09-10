@@ -1,6 +1,5 @@
 package grebnev.yadoa.dto;
 
-import grebnev.yadoa.validation.UniqueId;
 import grebnev.yadoa.validation.ValidItemImport;
 import lombok.Getter;
 import lombok.Setter;
