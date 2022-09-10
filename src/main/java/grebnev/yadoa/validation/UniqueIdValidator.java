@@ -9,13 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+//TODO del
 public class UniqueIdValidator implements ConstraintValidator<UniqueId, List<SystemItemImport>> {
     @Override
     public boolean isValid(List<SystemItemImport> systemItemImports, ConstraintValidatorContext constraintValidatorContext) {
-        if (systemItemImports == null) {
-            return true;
-        }
-        Set<String> distinctIds = systemItemImports.stream().map(SystemItemImport::getId).collect(Collectors.toSet());
-        return distinctIds.size() == systemItemImports.size();
+return  false;
     }
 }

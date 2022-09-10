@@ -1,6 +1,7 @@
 package grebnev.yadoa.dto;
 
 import grebnev.yadoa.validation.UniqueId;
+import grebnev.yadoa.validation.ValidItemImport;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Setter
 public class SystemItemImportRequest {
     @NotNull
-    @UniqueId
+    @ValidItemImport
     private List<SystemItemImport> items;
     //TODO добавить валидацию что дата в стандарте
     @NotNull
