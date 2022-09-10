@@ -29,7 +29,9 @@ public class SystemItemService {
 
     private void checkParentIsPresentOrThrow(String parentId, Set<String> idsFromRequest, Set<String> existingIds) {
         if (parentId == null) return;
-        if (existingIds.contains(parentId)) return;
+        if (existingIds.contains(parentId)) {
+
+        }
         if (idsFromRequest.contains(parentId)) return;
         throw new ValidationException("Parent for item isn't exist");
     }
