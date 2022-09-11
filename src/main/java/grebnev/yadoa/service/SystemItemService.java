@@ -4,6 +4,7 @@ import grebnev.yadoa.dto.SystemItemImport;
 import grebnev.yadoa.dto.SystemItemImportRequest;
 import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.mapper.SystemItemMapper;
+import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.model.SystemItemType;
 import grebnev.yadoa.entity.SystemItemEntity;
 import grebnev.yadoa.repository.SystemItemRepository;
@@ -32,6 +33,7 @@ public class SystemItemService {
         repository.saveAll(entitiesToSave);
     }
 
+    //Deletion of nested items is implemented by a stored procedure in the db
     @Transactional
     public void delete(String id, LocalDateTime date) {
         Optional<SystemItemEntity> maybeParent = findParentById(id);
@@ -40,6 +42,11 @@ public class SystemItemService {
             maybeParent.get().setDate(date);
             repository.save(maybeParent.get());
         }
+    }
+
+    public SystemItem findById(String id) {
+        List<SystemItemRepository.LeveledSystemItemEntity> items = repository.findAllElementsByRoot(id);
+        return null;
     }
 
     private Optional<SystemItemEntity> findParentById(String childId) {
@@ -129,8 +136,8 @@ public class SystemItemService {
         }
         return idsFromRequest;
     }
-
     //check if file or dir was moved
+
     private boolean parentShouldBeUpdate(SystemItemImport dto, Map<String, SystemItemEntity> existingEntities) {
         String id = dto.getId();
         SystemItemEntity existingEntity = existingEntities.get(id);
