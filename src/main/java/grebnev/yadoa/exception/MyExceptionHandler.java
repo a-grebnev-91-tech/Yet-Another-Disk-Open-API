@@ -1,66 +1,55 @@
 package grebnev.yadoa.exception;
 
-
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ValidationException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-public class MyExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final String CODE = "code";
-    private static final String MESSAGE = "message";
+public class MyExceptionHandler {
     private static final String VALIDATION_MESSAGE = "Validation Failed";
+    private static final String NOT_FOUND_MESSAGE = "Item not found";
 
-    @ExceptionHandler(value = Throwable.class)
-    protected ResponseEntity<Object> commonHandler(Throwable ex, WebRequest request) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Throwable.class)
+    protected ErrorResponse commonHandler(Throwable ex, WebRequest request) {
         log.warn("Unexpected error. Massage: {}", ex.getMessage());
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(getGeneralErrorBody(status, "Unexpected error has occurred"), status);
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error has occurred");
     }
 
-    @Override
-    @NonNull
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            @NonNull HttpHeaders headers,
-            @NonNull HttpStatus status,
-            @NonNull WebRequest request
-    ) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         log.warn("Not Valid. Massage: {}", ex.getMessage());
-        return new ResponseEntity<>(getGeneralErrorBody(status, VALIDATION_MESSAGE), headers, status);
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, VALIDATION_MESSAGE);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("Error: {}", ex.getMessage());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, VALIDATION_MESSAGE);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(value = NotFoundException.class)
-    protected ResponseEntity<Object> handleNotFound(NotFoundException ex, WebRequest request) {
+    protected ErrorResponse handleNotFound(NotFoundException ex) {
         log.warn("Not found error: {}", ex.getMessage());
-        return new ResponseEntity<>( request, HttpStatus.NOT_FOUND);
+        return new ErrorResponse(HttpStatus.NOT_FOUND, NOT_FOUND_MESSAGE);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = ValidationException.class)
-    protected ResponseEntity<Object> handleValidationError(ValidationException ex, WebRequest request) {
+    protected ErrorResponse handleValidationError(ValidationException ex) {
         log.warn("Not Valid. Massage: {}", ex.getMessage());
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(getGeneralErrorBody(status, VALIDATION_MESSAGE), status);
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, VALIDATION_MESSAGE);
     }
-
-    private Map<String, Object> getGeneralErrorBody(HttpStatus status, String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put(CODE,status.value());
-        body.put(MESSAGE, message);
-        return body;
-    }
-
 }
 
