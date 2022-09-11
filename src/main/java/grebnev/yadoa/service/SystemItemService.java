@@ -4,7 +4,8 @@ import grebnev.yadoa.dto.SystemItemImport;
 import grebnev.yadoa.dto.SystemItemImportRequest;
 import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.mapper.SystemItemMapper;
-import grebnev.yadoa.repository.SystemItemEntity;
+import grebnev.yadoa.model.SystemItemType;
+import grebnev.yadoa.entity.SystemItemEntity;
 import grebnev.yadoa.repository.SystemItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,14 +42,18 @@ public class SystemItemService {
         }
     }
 
-    private Optional<SystemItemEntity> findParentById(String id) {
-        Optional<SystemItemEntity> maybeExisting = repository.findById(id);
-        if (maybeExisting.isPresent()) return repository.findById(maybeExisting.get().getParentId());
-        else throw new NotFoundException(String.format("Entity with id %s isn't exits", id));
-    }
-
-    private void checkIfExistOrThrow(String id) {
-
+    private Optional<SystemItemEntity> findParentById(String childId) {
+        Optional<SystemItemEntity> maybeChild = repository.findById(childId);
+        if (maybeChild.isPresent()) {
+            String parentId = maybeChild.get().getParentId();
+            if (parentId != null) {
+                return repository.findById(parentId);
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            throw new NotFoundException(String.format("Entity with id %s isn't exits", childId));
+        }
     }
 
     private void checkParentOrThrow(
@@ -62,20 +67,20 @@ public class SystemItemService {
         //check parent existing & correct type
         if (existingIds.containsKey(parentId)) {
             SystemItemEntity parent = existingIds.get(parentId);
-            checkParentTypeOrThrow(parent.getType());
+            checkParentIsFolderOrThrow(parent.getType());
             return;
         }
         //check if parent is present in import and type is FOLDER
         Optional<SystemItemImport> maybeParent = idsFromRequest.get(parentId);
         if (maybeParent.isPresent()) {
             SystemItemImport parent = maybeParent.get();
-            checkParentTypeOrThrow(SystemItemType.valueOf(parent.getType()));
+            checkParentIsFolderOrThrow(SystemItemType.valueOf(parent.getType()));
         } else {
             throw new ValidationException("Parent for item isn't exist");
         }
     }
 
-    private void checkParentTypeOrThrow(SystemItemType type) {
+    private void checkParentIsFolderOrThrow(SystemItemType type) {
         if (type.equals(SystemItemType.FILE)) throw new ValidationException("Parent for item is FILE");
     }
 
@@ -92,11 +97,23 @@ public class SystemItemService {
     ) {
         List<SystemItemEntity> entitiesToSave = new ArrayList<>();
         for (SystemItemImport dto : request.getItems()) {
-            String curId = dto.getId();
-            String parentId = dto.getParentId();
-            checkParentOrThrow(parentId, idsFromRequest, existingEntities);
-            if (existingEntities.containsKey(curId)) checkTypeChangingOrThrow(dto, existingEntities);
+            checkParentOrThrow(dto.getParentId(), idsFromRequest, existingEntities);
+            if (existingEntities.containsKey(dto.getId())) checkTypeChangingOrThrow(dto, existingEntities);
             entitiesToSave.add(mapper.dtoToEntity(dto, request.getUpdateDate()));
+            //should update parent date if current item was moved
+            if (parentShouldBeUpdate(dto, existingEntities)) {
+                SystemItemEntity existingEntity = existingEntities.get(dto.getId());
+//                SystemItemEntity existingParent = existingEntities.get(existingEntity.getParentId());
+                String parentId = existingEntity.getParentId();
+                if (parentId != null) {
+                    Optional<SystemItemEntity> maybeParent = repository.findById(existingEntity.getParentId());
+                    if (maybeParent.isPresent()) {
+                        SystemItemEntity existingParent = maybeParent.get();
+                        existingParent.setDate(request.getUpdateDate());
+                        entitiesToSave.add(existingParent); //TODO check if can be del
+                    }
+                }
+            }
         }
         return entitiesToSave;
     }
@@ -111,5 +128,13 @@ public class SystemItemService {
             }
         }
         return idsFromRequest;
+    }
+
+    //check if file or dir was moved
+    private boolean parentShouldBeUpdate(SystemItemImport dto, Map<String, SystemItemEntity> existingEntities) {
+        String id = dto.getId();
+        SystemItemEntity existingEntity = existingEntities.get(id);
+        if (existingEntity == null) return false;
+        return !Objects.equals(dto.getParentId(), existingEntity.getParentId());
     }
 }

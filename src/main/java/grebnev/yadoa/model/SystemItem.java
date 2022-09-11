@@ -1,4 +1,4 @@
-package grebnev.yadoa.service;
+package grebnev.yadoa.model;
 
 import lombok.Getter;
 import lombok.Setter;

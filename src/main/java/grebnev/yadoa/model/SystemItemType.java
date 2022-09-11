@@ -1,4 +1,4 @@
-package grebnev.yadoa.service;
+package grebnev.yadoa.model;
 
 public enum SystemItemType {
     FILE,

@@ -1,6 +1,6 @@
 package grebnev.yadoa.mapper;
 
-import grebnev.yadoa.service.SystemItemType;
+import grebnev.yadoa.model.SystemItemType;
 import org.springframework.stereotype.Component;
 
 @Component

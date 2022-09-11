@@ -1,7 +1,7 @@
 package grebnev.yadoa.mapper;
 
 import grebnev.yadoa.dto.SystemItemImport;
-import grebnev.yadoa.repository.SystemItemEntity;
+import grebnev.yadoa.entity.SystemItemEntity;
 import org.mapstruct.*;
 
 import java.time.LocalDateTime;
