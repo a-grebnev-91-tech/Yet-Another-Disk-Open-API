@@ -29,5 +29,6 @@ public interface SystemItemRepository extends JpaRepository<SystemItemEntity, St
         String getParentId();
         SystemItemType getType();
         Long getSize();
+        Integer getLevel();
     }
 }

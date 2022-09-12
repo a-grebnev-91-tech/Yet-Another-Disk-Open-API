@@ -57,27 +57,57 @@ class SystemItemTest {
     }
 
     @Test
-    void test4_shouldSetParentWhenAddingToChild() {
-        SystemItem folder = getSingleItem(FOLDER);
+    void test4_shouldNotSetFileAsParent() {
         SystemItem file = getSingleItem(FILE);
+        SystemItem folder = getSingleItem(FOLDER);
+        folder.setParent(file);
 
-        folder.addChild(file);
-
-        assertNotNull(file.getParent());
-        assertEquals(folder, file.getParent());
+        assertNull(folder.getParent());
     }
 
     @Test
-    void test5_shouldAddChildrenWhenSettingParent() {
+    void test5_shouldReplaceUpdatedChild() {
         SystemItem folder = getSingleItem(FOLDER);
-        SystemItem file = getSingleItem(FILE);
+        SystemItem file = new SystemItem("id", FILE);
+        SystemItem fileCopy = new SystemItem("id", FILE);
+        fileCopy.setSize(100L);
+        folder.addChild(file);
+        folder.addChild(fileCopy);
 
-        file.setParent(folder);
-        assertNotNull(file.getParent());
-        assertNotNull(folder.getChildren());
-        assertFalse(folder.getChildren().isEmpty());
-        assertEquals(folder.getChildren().get(0), file);
+        assertEquals(1, folder.getChildren().size());
+        assertEquals(fileCopy.getSize(), folder.getChildren().get(0).getSize());
     }
+
+    @Test
+    void test6_shouldNotAddNullChildren() {
+        SystemItem folder = getSingleItem(FOLDER);
+        assertDoesNotThrow(() -> folder.addChild(null));
+        assertEquals(0, folder.getChildren().size());
+    }
+
+    //TODO remove
+//    @Test
+//    void test4_shouldSetParentWhenAddingToChild() {
+//        SystemItem folder = getSingleItem(FOLDER);
+//        SystemItem file = getSingleItem(FILE);
+//
+//        folder.addChild(file);
+//
+//        assertNotNull(file.getParent());
+//        assertEquals(folder, file.getParent());
+//    }
+//
+//    @Test
+//    void test5_shouldAddChildrenWhenSettingParent() {
+//        SystemItem folder = getSingleItem(FOLDER);
+//        SystemItem file = getSingleItem(FILE);
+//
+//        file.setParent(folder);
+//        assertNotNull(file.getParent());
+//        assertNotNull(folder.getChildren());
+//        assertFalse(folder.getChildren().isEmpty());
+//        assertEquals(folder.getChildren().get(0), file);
+//    }
 
     private List<SystemItem> getFourItemsWithRandomDate() {
         List<SystemItem> items = new ArrayList<>();
