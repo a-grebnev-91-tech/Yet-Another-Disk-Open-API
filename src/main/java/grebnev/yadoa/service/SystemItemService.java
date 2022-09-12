@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,6 +45,12 @@ public class SystemItemService {
             maybeParent.get().setDate(date);
             repository.save(maybeParent.get());
         }
+    }
+
+    public List<SystemItemExport> findLastUpdated(Instant to) {
+        int secondsInDay = 24 * 60 * 60;
+        Instant from = to.minusSeconds(secondsInDay);
+        return mapper.filesToDto(repository.findLastUpdated(from, to));
     }
 
     public SystemItemExport findById(String id) {
@@ -130,7 +134,6 @@ public class SystemItemService {
         }
         return entitiesToSave;
     }
-
     private Map<String, Optional<SystemItemImport>> getIdsFromRequest(SystemItemImportRequest request) {
         Map<String, Optional<SystemItemImport>> idsFromRequest = new HashMap<>(request.getItems().size() * 2);
         for (SystemItemImport dto : request.getItems()) {
@@ -142,6 +145,7 @@ public class SystemItemService {
         }
         return idsFromRequest;
     }
+
     //check if file or dir was moved
 
     private boolean parentShouldBeUpdate(SystemItemImport dto, Map<String, SystemItemEntity> existingEntities) {

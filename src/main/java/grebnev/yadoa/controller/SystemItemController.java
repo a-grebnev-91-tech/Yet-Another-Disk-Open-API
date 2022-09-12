@@ -2,7 +2,6 @@ package grebnev.yadoa.controller;
 
 import grebnev.yadoa.dto.SystemItemExport;
 import grebnev.yadoa.dto.SystemItemImportRequest;
-import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.service.SystemItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -34,11 +32,16 @@ public class SystemItemController {
         service.delete(id, date);
     }
 
-    //  /nodes/{id}:
     @GetMapping("/nodes/{id}")
     public SystemItemExport findById(@PathVariable("id") String id) {
         log.info("Trying to get item by id {}", id);
         return service.findById(id);
+    }
+
+    @GetMapping("/updates")
+    public List<SystemItemExport> findLastUpdated(@RequestParam("date") Instant date) {
+        log.info("Trying to get items updated last 24 hours before {}", date);
+        return service.findLastUpdated(date);
     }
 }
 

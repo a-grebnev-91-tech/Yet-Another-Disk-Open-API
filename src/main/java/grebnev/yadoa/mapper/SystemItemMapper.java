@@ -9,6 +9,7 @@ import org.mapstruct.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {SystemItemReferenceMapper.class})
 public interface SystemItemMapper {
@@ -16,9 +17,12 @@ public interface SystemItemMapper {
     @Mapping(source = "dto.type", target = "type")
     SystemItemEntity dtoToEntity(SystemItemImport dto, Instant updateDate);
 
+    List<SystemItemExport> filesToDto(List<SystemItemEntity> files);
+
     @Mapping(source = "parent", target = "parentId")
     SystemItemExport modelToDto(SystemItem model);
 
+    //todo remove?
     //TODO test if set null to null
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
     @Mapping(source = "updateDate", target = "date")
