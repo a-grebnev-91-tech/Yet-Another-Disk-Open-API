@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -27,13 +24,13 @@ public class SystemItem {
     @Getter(AccessLevel.NONE)
     private Long size;
     @Getter(AccessLevel.NONE)
-    private final Set<SystemItem> children;
+    private final Map<String, SystemItem> children;
 
     public SystemItem(String id, SystemItemType type) {
         this.id = id;
         this.type = type;
         if (type.equals(SystemItemType.FOLDER)) {
-            this.children = new HashSet<>();
+            this.children = new HashMap<>();
         } else {
             this.children = null;
         }
@@ -41,18 +38,17 @@ public class SystemItem {
 
     public void addChild(SystemItem child) {
         if (children == null || child == null) return;
-        children.remove(child);
-        children.add(child);
+        children.put(child.getId(), child);
     }
 
-    public List<SystemItem> getChildren() {
+    public Map<String, SystemItem> getChildren() {
         if (children == null) return null;
-        return List.copyOf(children);
+        return Map.copyOf(children);
     }
 
     public LocalDateTime getDate() {
         if (children != null && !children.isEmpty()) {
-            LocalDateTime maxDateFromChildren = children
+            LocalDateTime maxDateFromChildren = children.values()
                     .stream()
                     .map(SystemItem::getDate)
                     .max(LocalDateTime::compareTo)
@@ -70,7 +66,10 @@ public class SystemItem {
 //            if (children.isEmpty()) return 0L;
 //            List<Long> sized = children.stream().map(SystemItem::getSize).filter(Objects::nonNull).collect(Collectors.toList());
             String id = this.getId();
-            Long curSize = children.stream().map(SystemItem::getSize).filter(Objects::nonNull).reduce(0L, Long::sum);
+            Long curSize = children.values().stream()
+                    .map(SystemItem::getSize)
+                    .filter(Objects::nonNull)
+                    .reduce(0L, Long::sum);
             return curSize;
         }
     }

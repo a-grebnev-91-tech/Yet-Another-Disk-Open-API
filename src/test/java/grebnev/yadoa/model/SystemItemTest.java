@@ -75,7 +75,7 @@ class SystemItemTest {
         folder.addChild(fileCopy);
 
         assertEquals(1, folder.getChildren().size());
-        assertEquals(fileCopy.getSize(), folder.getChildren().get(0).getSize());
+        assertEquals(fileCopy.getSize(), folder.getChildren().get("id").getSize());
     }
 
     @Test
