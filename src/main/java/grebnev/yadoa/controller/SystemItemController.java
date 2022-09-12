@@ -10,7 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @RestController
@@ -27,7 +29,7 @@ public class SystemItemController {
     @DeleteMapping("/delete/{id}")
     public void deleteItem(
             @PathVariable("id") String id,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant date) {
         log.info("Trying to delete item with id {}", id);
         service.delete(id, date);
     }

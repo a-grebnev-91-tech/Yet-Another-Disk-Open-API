@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS system_items
 (
     id      VARCHAR PRIMARY KEY,
     url     VARCHAR,
-    updated TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated TIMESTAMP WITH TIME ZONE NOT NULL,
     parent  VARCHAR,
     type    VARCHAR                     NOT NULL,
     size    BIGINT

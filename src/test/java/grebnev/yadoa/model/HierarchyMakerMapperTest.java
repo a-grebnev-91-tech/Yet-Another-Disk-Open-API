@@ -1,5 +1,6 @@
 package grebnev.yadoa.model;
 
+import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.repository.SystemItemRepository;
 import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,10 +9,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.time.Instant;
+import java.util.*;
 
 import static grebnev.yadoa.model.SystemItemType.FILE;
 import static grebnev.yadoa.model.SystemItemType.FOLDER;
@@ -40,18 +39,28 @@ class HierarchyMakerMapperTest {
 
     private HierarchyMakerMapper mapper;
     private Random rnd = new Random();
-    private LocalDateTime latestDate;
-    private LocalDateTime rootDate;
-    private LocalDateTime firstLevelFileDate;
-    private LocalDateTime firstLevelFolderDate;
-    private LocalDateTime firstLevelEmptyFolderDate;
-    private LocalDateTime secondLevelFileDate;
-    private LocalDateTime secondLevelFolderDate;
-    private LocalDateTime thirdLevelFileDate;
+    private Instant latestDate;
+    private Instant rootDate;
+    private Instant firstLevelFileDate;
+    private Instant firstLevelFolderDate;
+    private Instant firstLevelEmptyFolderDate;
+    private Instant secondLevelFileDate;
+    private Instant secondLevelFolderDate;
+    private Instant thirdLevelFileDate;
 
     @BeforeAll
     void initMapper() {
         mapper = new HierarchyMakerMapper();
+    }
+
+    @Test
+    void test1_shouldThrowExceptionForNullList() {
+        assertThrows(IllegalArgumentException.class, () -> mapper.getHierarchy(null));
+    }
+
+    @Test
+    void test1_shouldThrowNotFoundExceptionForEmptyList() {
+        assertThrows(NotFoundException.class, () -> mapper.getHierarchy(Collections.emptyList()));
     }
 
     @Test
@@ -167,7 +176,7 @@ class HierarchyMakerMapperTest {
 
         SystemItemRepository.LeveledSystemItemEntity secondLevelFolder
                 = Mockito.mock(SystemItemRepository.LeveledSystemItemEntity.class);
-        secondLevelFolderDate = LocalDateTime.now();
+        secondLevelFolderDate = Instant.now();
         latestDate = secondLevelFolderDate;
         when(secondLevelFolder.getId()).thenReturn(SECOND_LEVEL_FOLDER_ID);
         when(secondLevelFolder.getUpdated()).thenReturn(secondLevelFolderDate);
@@ -197,8 +206,8 @@ class HierarchyMakerMapperTest {
         return items;
     }
 
-    private LocalDateTime getRandomDateInPast() {
-        LocalDateTime date = LocalDateTime.now();
+    private Instant getRandomDateInPast() {
+        Instant date = Instant.now();
         return date.minusSeconds(rnd.nextInt(1_000_000));
     }
 }

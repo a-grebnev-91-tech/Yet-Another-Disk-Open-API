@@ -3,6 +3,7 @@ package grebnev.yadoa.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -35,9 +36,9 @@ class SystemItemTest {
     void test2_shouldReturnMaxDateFromChildren() {
         List<SystemItem> items = getFourItemsWithRandomDate();
 
-        items.get(2).setDate(LocalDateTime.now());
+        items.get(2).setDate(Instant.now());
 
-        LocalDateTime maxDate = items.stream().map(SystemItem::getDate).max(LocalDateTime::compareTo).get();
+        Instant maxDate = items.stream().map(SystemItem::getDate).max(Instant::compareTo).get();
         items.get(1).addChild(items.get(3));
         items.get(0).addChild(items.get(1));
         items.get(0).addChild(items.get(2));
@@ -130,8 +131,8 @@ class SystemItemTest {
         return item;
     }
 
-    private LocalDateTime getRandomDateInPast() {
-        LocalDateTime date = LocalDateTime.now();
+    private Instant getRandomDateInPast() {
+        Instant date = Instant.now();
         return date.minusSeconds(rnd.nextInt(1_000_000));
     }
 }

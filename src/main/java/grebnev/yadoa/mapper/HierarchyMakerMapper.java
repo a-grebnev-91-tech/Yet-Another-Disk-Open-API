@@ -5,6 +5,7 @@ import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.repository.SystemItemRepository;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class HierarchyMakerMapper {
     private Map<Integer, Map<String, SystemItem>> leveledModelMap;
 
     public SystemItem getHierarchy(List<SystemItemRepository.LeveledSystemItemEntity> leveledEntities) {
+        if (leveledEntities == null) throw new IllegalArgumentException("Leveled entities list couldn't be null");
         fillLeveledMaps(leveledEntities);
         return makeHierarchy();
     }
@@ -68,7 +70,7 @@ public class HierarchyMakerMapper {
         } else if (leveledModelMap.size() == 1) {
             return leveledModelMap.values().stream().findFirst().get().values().stream().findFirst().get();
         } else {
-            throw new NotFoundException("Item with id %s isn't exist");
+            throw new NotFoundException("Item with corresponded id isn't exist");
         }
     }
 

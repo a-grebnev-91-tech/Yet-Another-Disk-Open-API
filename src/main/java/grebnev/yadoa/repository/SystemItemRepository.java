@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface SystemItemRepository extends JpaRepository<SystemItemEntity, String> {
@@ -25,7 +27,7 @@ public interface SystemItemRepository extends JpaRepository<SystemItemEntity, St
     interface LeveledSystemItemEntity {
         String getId();
         String getUrl();
-        LocalDateTime getUpdated();
+        Instant getUpdated();
         String getParent();
         SystemItemType getType();
         Long getSize();

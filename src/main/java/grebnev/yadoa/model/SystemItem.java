@@ -5,7 +5,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Getter
@@ -16,7 +18,7 @@ public class SystemItem {
     private final String id;
     private String url;
     @Getter(AccessLevel.NONE)
-    private LocalDateTime date;
+    private Instant date;
     @Setter(AccessLevel.NONE)
     private SystemItem parent;
     private final SystemItemType type;
@@ -45,12 +47,12 @@ public class SystemItem {
         return Map.copyOf(children);
     }
 
-    public LocalDateTime getDate() {
+    public Instant getDate() {
         if (children != null && !children.isEmpty()) {
-            LocalDateTime maxDateFromChildren = children.values()
+            Instant maxDateFromChildren = children.values()
                     .stream()
                     .map(SystemItem::getDate)
-                    .max(LocalDateTime::compareTo)
+                    .max(Instant::compareTo)
                     .get();
             if (maxDateFromChildren.isAfter(this.date)) this.date = maxDateFromChildren;
         }

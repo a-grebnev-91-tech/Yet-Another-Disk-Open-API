@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ public class SystemItemService {
 
     //Deletion of nested items is implemented by a stored procedure in the db
     @Transactional
-    public void delete(String id, LocalDateTime date) {
+    public void delete(String id, Instant date) {
         Optional<SystemItemEntity> maybeParent = findParentById(id);
         repository.deleteById(id);
         if (maybeParent.isPresent()) {
@@ -115,8 +117,7 @@ public class SystemItemService {
             //should update parent date if current item was moved
             if (parentShouldBeUpdate(dto, existingEntities)) {
                 SystemItemEntity existingEntity = existingEntities.get(dto.getId());
-//                SystemItemEntity existingParent = existingEntities.get(existingEntity.getParentId());
-                String parentId = existingEntity.getParentId();
+                    String parentId = existingEntity.getParentId();
                 if (parentId != null) {
                     Optional<SystemItemEntity> maybeParent = repository.findById(existingEntity.getParentId());
                     if (maybeParent.isPresent()) {

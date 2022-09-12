@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -16,5 +18,5 @@ public class SystemItemImportRequest {
     private List<SystemItemImport> items;
     //TODO добавить валидацию что дата в стандарте
     @NotNull
-    private LocalDateTime updateDate;
+    private Instant updateDate;
 }

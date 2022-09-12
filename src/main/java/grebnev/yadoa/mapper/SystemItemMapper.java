@@ -6,13 +6,15 @@ import grebnev.yadoa.entity.SystemItemEntity;
 import grebnev.yadoa.model.SystemItem;
 import org.mapstruct.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Mapper(componentModel = "spring", uses = {SystemItemReferenceMapper.class})
 public interface SystemItemMapper {
     @Mapping(source = "updateDate", target = "date")
     @Mapping(source = "dto.type", target = "type")
-    SystemItemEntity dtoToEntity(SystemItemImport dto, LocalDateTime updateDate);
+    SystemItemEntity dtoToEntity(SystemItemImport dto, Instant updateDate);
 
     @Mapping(source = "parent", target = "parentId")
     SystemItemExport modelToDto(SystemItem model);
@@ -23,6 +25,6 @@ public interface SystemItemMapper {
     void updateEntity(
             @MappingTarget SystemItemEntity currentOptionalEntity,
             SystemItemImport dto,
-            LocalDateTime updateDate
+            Instant updateDate
     );
 }

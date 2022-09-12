@@ -17,13 +17,12 @@ public class MyExceptionHandler {
     private static final String VALIDATION_MESSAGE = "Validation Failed";
     private static final String NOT_FOUND_MESSAGE = "Item not found";
 
-    //todo uncomment
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    @ExceptionHandler(Throwable.class)
-//    protected ErrorResponse commonHandler(Throwable ex, WebRequest request) {
-//        log.warn("Unexpected error. Massage: {}", ex.getMessage());
-//        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error has occurred");
-//    }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Throwable.class)
+    protected ErrorResponse commonHandler(Throwable ex, WebRequest request) {
+        log.warn("Unexpected error. Massage: {}", ex.getMessage());
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error has occurred");
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
