@@ -1,8 +1,10 @@
 package grebnev.yadoa.service;
 
+import grebnev.yadoa.dto.SystemItemExport;
 import grebnev.yadoa.dto.SystemItemImport;
 import grebnev.yadoa.dto.SystemItemImportRequest;
 import grebnev.yadoa.exception.NotFoundException;
+import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import grebnev.yadoa.mapper.SystemItemMapper;
 import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.model.SystemItemType;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class SystemItemService {
     private final SystemItemRepository repository;
     private final SystemItemMapper mapper;
+    private final HierarchyMakerMapper hierarchyMakerMapper;
 
     @Transactional
     public void add(SystemItemImportRequest request) {
@@ -44,9 +47,11 @@ public class SystemItemService {
         }
     }
 
-    public SystemItem findById(String id) {
+    public SystemItemExport findById(String id) {
         List<SystemItemRepository.LeveledSystemItemEntity> items = repository.findAllElementsByRoot(id);
-        return null;
+        if (items.size() == 0) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
+        SystemItem root = hierarchyMakerMapper.getHierarchy(items);
+        return mapper.modelToDto(root);
     }
 
     private Optional<SystemItemEntity> findParentById(String childId) {

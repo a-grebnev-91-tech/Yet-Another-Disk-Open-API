@@ -1,6 +1,7 @@
 package grebnev.yadoa.model;
 
 import grebnev.yadoa.repository.SystemItemRepository;
+import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -122,15 +123,15 @@ class HierarchyMakerMapperTest {
         when(rootFolder.getLevel()).thenReturn(0);
         when((rootFolder.getType())).thenReturn(FOLDER);
         rootDate = getRandomDateInPast();
-        when(rootFolder.getUpdateDate()).thenReturn(rootDate);
+        when(rootFolder.getUpdated()).thenReturn(rootDate);
 
         SystemItemRepository.LeveledSystemItemEntity firstLevelFile
                 = Mockito.mock(SystemItemRepository.LeveledSystemItemEntity.class);
         when(firstLevelFile.getId()).thenReturn(FIRST_LEVEL_FILE_ID);
         when(firstLevelFile.getUrl()).thenReturn(FIRST_LEVEL_FILE_URL);
         firstLevelFileDate = getRandomDateInPast();
-        when(firstLevelFile.getUpdateDate()).thenReturn(firstLevelFileDate);
-        when(firstLevelFile.getParentId()).thenReturn(ROOT_FOLDER_ID);
+        when(firstLevelFile.getUpdated()).thenReturn(firstLevelFileDate);
+        when(firstLevelFile.getParent()).thenReturn(ROOT_FOLDER_ID);
         when((firstLevelFile.getType())).thenReturn(FILE);
         when(firstLevelFile.getSize()).thenReturn(1L);
         when(firstLevelFile.getLevel()).thenReturn(1);
@@ -139,8 +140,8 @@ class HierarchyMakerMapperTest {
                 = Mockito.mock(SystemItemRepository.LeveledSystemItemEntity.class);
         when(firstLevelFolder.getId()).thenReturn(FIRST_LEVEL_FOLDER_ID);
         firstLevelFolderDate = getRandomDateInPast();
-        when(firstLevelFolder.getUpdateDate()).thenReturn(firstLevelFolderDate);
-        when(firstLevelFolder.getParentId()).thenReturn(ROOT_FOLDER_ID);
+        when(firstLevelFolder.getUpdated()).thenReturn(firstLevelFolderDate);
+        when(firstLevelFolder.getParent()).thenReturn(ROOT_FOLDER_ID);
         when((firstLevelFolder.getType())).thenReturn(FOLDER);
         when(firstLevelFolder.getLevel()).thenReturn(1);
 
@@ -148,8 +149,8 @@ class HierarchyMakerMapperTest {
                 = Mockito.mock(SystemItemRepository.LeveledSystemItemEntity.class);
         when(firstLevelEmptyFolder.getId()).thenReturn(FIRST_LEVEL_EMPTY_FOLDER_ID);
         firstLevelEmptyFolderDate = getRandomDateInPast();
-        when(firstLevelEmptyFolder.getUpdateDate()).thenReturn(firstLevelEmptyFolderDate);
-        when(firstLevelEmptyFolder.getParentId()).thenReturn(ROOT_FOLDER_ID);
+        when(firstLevelEmptyFolder.getUpdated()).thenReturn(firstLevelEmptyFolderDate);
+        when(firstLevelEmptyFolder.getParent()).thenReturn(ROOT_FOLDER_ID);
         when((firstLevelEmptyFolder.getType())).thenReturn(FOLDER);
         when(firstLevelEmptyFolder.getLevel()).thenReturn(1);
 
@@ -158,8 +159,8 @@ class HierarchyMakerMapperTest {
         when(secondLevelFile.getId()).thenReturn(SECOND_LEVEL_FILE_ID);
         when(secondLevelFile.getUrl()).thenReturn(SECOND_LEVEL_FILE_URL);
         secondLevelFileDate = getRandomDateInPast();
-        when(secondLevelFile.getUpdateDate()).thenReturn(secondLevelFileDate);
-        when(secondLevelFile.getParentId()).thenReturn(FIRST_LEVEL_FOLDER_ID);
+        when(secondLevelFile.getUpdated()).thenReturn(secondLevelFileDate);
+        when(secondLevelFile.getParent()).thenReturn(FIRST_LEVEL_FOLDER_ID);
         when((secondLevelFile.getType())).thenReturn(FILE);
         when(secondLevelFile.getSize()).thenReturn(1L);
         when(secondLevelFile.getLevel()).thenReturn(2);
@@ -169,8 +170,8 @@ class HierarchyMakerMapperTest {
         secondLevelFolderDate = LocalDateTime.now();
         latestDate = secondLevelFolderDate;
         when(secondLevelFolder.getId()).thenReturn(SECOND_LEVEL_FOLDER_ID);
-        when(secondLevelFolder.getUpdateDate()).thenReturn(secondLevelFolderDate);
-        when(secondLevelFolder.getParentId()).thenReturn(FIRST_LEVEL_FOLDER_ID);
+        when(secondLevelFolder.getUpdated()).thenReturn(secondLevelFolderDate);
+        when(secondLevelFolder.getParent()).thenReturn(FIRST_LEVEL_FOLDER_ID);
         when((secondLevelFolder.getType())).thenReturn(FOLDER);
         when(secondLevelFolder.getLevel()).thenReturn(2);
 
@@ -179,9 +180,9 @@ class HierarchyMakerMapperTest {
         when(thirdLevelFile.getId()).thenReturn(THIRD_LEVEL_FILE_ID);
         when(thirdLevelFile.getUrl()).thenReturn(THIRD_LEVEL_FILE_URL);
         thirdLevelFileDate = getRandomDateInPast();
-        when(thirdLevelFile.getUpdateDate()).thenReturn(thirdLevelFileDate);
+        when(thirdLevelFile.getUpdated()).thenReturn(thirdLevelFileDate);
         when((thirdLevelFile.getType())).thenReturn(FILE);
-        when(thirdLevelFile.getParentId()).thenReturn(SECOND_LEVEL_FOLDER_ID);
+        when(thirdLevelFile.getParent()).thenReturn(SECOND_LEVEL_FOLDER_ID);
         when(thirdLevelFile.getSize()).thenReturn(1L);
         when(thirdLevelFile.getLevel()).thenReturn(3);
 

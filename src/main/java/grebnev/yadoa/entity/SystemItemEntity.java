@@ -16,13 +16,13 @@ public class SystemItemEntity {
     private String id;
     @Column(name = "url")
     private String url;
-    @Column(name = "update_date")
+    @Column(name = "updated")
     private LocalDateTime date;
     //TODO del
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "parent_id")
 //    private SystemItemEntity parent;
-    @Column(name = "parent_id")
+    @Column(name = "parent")
     private String parentId;
     @Column(name = "type")
     @Enumerated(EnumType.STRING)

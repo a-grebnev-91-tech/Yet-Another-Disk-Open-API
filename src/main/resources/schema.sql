@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS system_items
 (
-    id          VARCHAR PRIMARY KEY,
-    url         VARCHAR,
-    update_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    parent_id   VARCHAR,
-    type        VARCHAR                     NOT NULL,
-    size        BIGINT
+    id      VARCHAR PRIMARY KEY,
+    url     VARCHAR,
+    updated TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    parent  VARCHAR,
+    type    VARCHAR                     NOT NULL,
+    size    BIGINT
 );
 
 CREATE OR REPLACE FUNCTION delete_children() RETURNS TRIGGER AS
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION delete_children() RETURNS TRIGGER AS
     BEGIN
         DELETE
         FROM system_items
-        WHERE parent_id = OLD.id;
+        WHERE parent = OLD.id;
         RETURN NULL;
     END;
 ' LANGUAGE plpgsql;

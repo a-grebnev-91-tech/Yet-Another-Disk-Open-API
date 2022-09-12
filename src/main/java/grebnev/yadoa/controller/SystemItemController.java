@@ -1,5 +1,6 @@
 package grebnev.yadoa.controller;
 
+import grebnev.yadoa.dto.SystemItemExport;
 import grebnev.yadoa.dto.SystemItemImportRequest;
 import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.service.SystemItemService;
@@ -33,7 +34,7 @@ public class SystemItemController {
 
     //  /nodes/{id}:
     @GetMapping("/nodes/{id}")
-    public SystemItem findById(@PathVariable("id") String id) {
+    public SystemItemExport findById(@PathVariable("id") String id) {
         log.info("Trying to get item by id {}", id);
         return service.findById(id);
     }
