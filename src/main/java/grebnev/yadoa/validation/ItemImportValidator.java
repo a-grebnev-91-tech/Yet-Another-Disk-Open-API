@@ -17,19 +17,19 @@ public class ItemImportValidator implements ConstraintValidator<ValidItemImport,
             ConstraintValidatorContext constraintValidatorContext
     ) {
         if (imports == null) return false;
-        if (isRepeatingId(imports)) return false;
+        if (isRecurringId(imports)) return false;
         for (SystemItemImport anImport : imports) {
-            if (!isValid(anImport)) return false;
+            if (!isItemValid(anImport)) return false;
         }
         return true;
     }
 
-    private boolean isRepeatingId(List<SystemItemImport> imports) {
+    private boolean isRecurringId(List<SystemItemImport> imports) {
         Set<String> distinctIds = imports.stream().map(SystemItemImport::getId).collect(Collectors.toSet());
         return distinctIds.size() != imports.size();
     }
 
-    private boolean isValid(SystemItemImport systemItemImport) {
+    private boolean isItemValid(SystemItemImport systemItemImport) {
         if (systemItemImport == null) return false;
 
         String id = systemItemImport.getId();
