@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -20,10 +18,6 @@ public class SystemItemEntity {
     private String url;
     @Column(name = "updated")
     private Instant date;
-    //TODO del
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "parent_id")
-//    private SystemItemEntity parent;
     @Column(name = "parent")
     private String parentId;
     @Column(name = "type")

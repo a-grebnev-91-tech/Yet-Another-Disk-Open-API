@@ -5,7 +5,6 @@ import grebnev.yadoa.model.SystemItem;
 import grebnev.yadoa.repository.SystemItemRepository;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,48 +85,4 @@ public class HierarchyMakerMapper {
         item.setUrl(leveledEntity.getUrl());
         return item;
     }
-//TODO delete
-
-//    public SystemItem getHierarchy(List<SystemItemRepository.LeveledSystemItemEntity> leveledEntities) {
-//        Map<Integer, Map<String, SystemItem>> leveledModelMap = getLeveledMap(leveledEntities);
-//        SystemItem rootItem = makeHierarchy(leveledModelMap);
-//        return rootItem;
-//    }
-//
-//    private SystemItem makeHierarchy(
-//            Map<Integer, Map<String, SystemItem>> leveledModelMap
-//    ) {
-//        for (int i = leveledModelMap.size() - 1; i > 0; i--) {
-//            Map<String, SystemItem> curLevel = leveledModelMap.get(i);
-//            Map<String, SystemItem> upperLevel = leveledModelMap.get(i - 1);
-//            for (SystemItem child : curLevel.values()) {
-//                SystemItem parent = upperLevel.get(child.getParent());
-//                makeConnection()
-//            }
-//        }
-//    }
-//
-//    private Map<Integer, Map<String, SystemItem>> getLeveledMap(
-//            List<SystemItemRepository.LeveledSystemItemEntity> leveledEntities
-//    ) {
-//        Map<Integer, Map<String, SystemItem>> leveledMap = new HashMap<>();
-//        for (SystemItemRepository.LeveledSystemItemEntity leveledEntity : leveledEntities) {
-//            SystemItem item = mapEntityToModel(leveledEntity);
-//            int level = leveledEntity.getLevel();
-//            Map<String, SystemItem> curLevelMap = leveledMap.get(level);
-//            if (curLevelMap == null) {
-//                curLevelMap = new HashMap<>();
-//            }
-//            curLevelMap.put(item.getId(), item);
-//        }
-//        return leveledMap;
-//    }
-//
-//    private SystemItem mapEntityToModel(SystemItemRepository.LeveledSystemItemEntity leveledEntity) {
-//        SystemItem item = new SystemItem(leveledEntity.getId(), leveledEntity.getType());
-//        item.setDate(leveledEntity.getUpdateDate());
-//        item.setSize(leveledEntity.getSize());
-//        item.setUrl(leveledEntity.getUrl());
-//        return item;
-//    }
 }

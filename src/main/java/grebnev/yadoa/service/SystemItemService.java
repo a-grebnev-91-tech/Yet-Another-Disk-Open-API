@@ -121,7 +121,7 @@ public class SystemItemService {
             //should update parent date if current item was moved
             if (parentShouldBeUpdate(dto, existingEntities)) {
                 SystemItemEntity existingEntity = existingEntities.get(dto.getId());
-                    String parentId = existingEntity.getParentId();
+                String parentId = existingEntity.getParentId();
                 if (parentId != null) {
                     Optional<SystemItemEntity> maybeParent = repository.findById(existingEntity.getParentId());
                     if (maybeParent.isPresent()) {
@@ -134,6 +134,7 @@ public class SystemItemService {
         }
         return entitiesToSave;
     }
+
     private Map<String, Optional<SystemItemImport>> getIdsFromRequest(SystemItemImportRequest request) {
         Map<String, Optional<SystemItemImport>> idsFromRequest = new HashMap<>(request.getItems().size() * 2);
         for (SystemItemImport dto : request.getItems()) {
@@ -147,7 +148,6 @@ public class SystemItemService {
     }
 
     //check if file or dir was moved
-
     private boolean parentShouldBeUpdate(SystemItemImport dto, Map<String, SystemItemEntity> existingEntities) {
         String id = dto.getId();
         SystemItemEntity existingEntity = existingEntities.get(id);

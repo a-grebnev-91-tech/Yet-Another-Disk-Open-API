@@ -2,7 +2,6 @@ package grebnev.yadoa.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,30 +84,6 @@ class SystemItemTest {
         assertDoesNotThrow(() -> folder.addChild(null));
         assertEquals(0, folder.getChildren().size());
     }
-
-    //TODO remove
-//    @Test
-//    void test4_shouldSetParentWhenAddingToChild() {
-//        SystemItem folder = getSingleItem(FOLDER);
-//        SystemItem file = getSingleItem(FILE);
-//
-//        folder.addChild(file);
-//
-//        assertNotNull(file.getParent());
-//        assertEquals(folder, file.getParent());
-//    }
-//
-//    @Test
-//    void test5_shouldAddChildrenWhenSettingParent() {
-//        SystemItem folder = getSingleItem(FOLDER);
-//        SystemItem file = getSingleItem(FILE);
-//
-//        file.setParent(folder);
-//        assertNotNull(file.getParent());
-//        assertNotNull(folder.getChildren());
-//        assertFalse(folder.getChildren().isEmpty());
-//        assertEquals(folder.getChildren().get(0), file);
-//    }
 
     private List<SystemItem> getFourItemsWithRandomDate() {
         List<SystemItem> items = new ArrayList<>();

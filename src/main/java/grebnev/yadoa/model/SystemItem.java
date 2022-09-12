@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @Getter
@@ -63,15 +61,11 @@ public class SystemItem {
         if (this.type.equals(SystemItemType.FILE)) {
             return size;
         } else {
-            //TODO del
-//            if (children.isEmpty()) return 0L;
-//            List<Long> sized = children.stream().map(SystemItem::getSize).filter(Objects::nonNull).collect(Collectors.toList());
             String id = this.getId();
-            Long curSize = children.values().stream()
+            return children.values().stream()
                     .map(SystemItem::getSize)
                     .filter(Objects::nonNull)
                     .reduce(0L, Long::sum);
-            return curSize;
         }
     }
 

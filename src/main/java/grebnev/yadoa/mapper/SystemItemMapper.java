@@ -7,8 +7,6 @@ import grebnev.yadoa.model.SystemItem;
 import org.mapstruct.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {SystemItemReferenceMapper.class})

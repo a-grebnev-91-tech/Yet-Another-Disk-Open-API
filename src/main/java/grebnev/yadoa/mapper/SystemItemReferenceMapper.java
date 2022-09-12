@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class SystemItemReferenceMapper {
@@ -31,7 +30,6 @@ public class SystemItemReferenceMapper {
             exports.add(dto);
         }
         return exports;
-        //        return modelMap.values().stream().map(mapper::modelToDto).collect(Collectors.toList());
     }
 
     String modelToId(SystemItem model) {
