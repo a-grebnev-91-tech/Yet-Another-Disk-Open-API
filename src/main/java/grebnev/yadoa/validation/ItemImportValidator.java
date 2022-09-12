@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ItemImportValidator implements ConstraintValidator<ValidItemImport, List<SystemItemImport>> {
-    @Override
+public class ItemImportValidator  {
     public boolean isValid(
             List<SystemItemImport> imports,
             ConstraintValidatorContext constraintValidatorContext

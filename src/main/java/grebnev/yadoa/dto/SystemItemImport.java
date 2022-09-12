@@ -1,22 +1,21 @@
 package grebnev.yadoa.dto;
 
-import grebnev.yadoa.validation.ValidItemImport;
-import grebnev.yadoa.validation.ValidType;
+import grebnev.yadoa.validation.ValidItemType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
 public class SystemItemImport {
     @NotBlank
     private String id;
-    @Max(255)
+    @Size(max = 255)
     private String url;
     private String parentId;
-    @ValidType
+    @ValidItemType
     private String type;
     private Long size;
 }

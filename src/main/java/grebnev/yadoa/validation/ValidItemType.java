@@ -11,9 +11,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({METHOD, FIELD, ANNOTATION_TYPE, TYPE_USE})
 @Retention(RUNTIME)
-@Constraint(validatedBy = ItemImportValidator.class)
-public @interface ValidItemImport {
-    String message() default "Item import is invalid";
+@Constraint(validatedBy = ItemTypeValidator.class)
+public @interface ValidItemType {
+    String message() default "Item type should be valid";
 
     Class<?>[] groups() default {};
 
