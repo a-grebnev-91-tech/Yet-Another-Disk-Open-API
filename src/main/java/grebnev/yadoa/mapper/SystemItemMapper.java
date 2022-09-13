@@ -31,7 +31,9 @@ public interface SystemItemMapper {
             Instant updateDate
     );
 
-    SystemItem dtoToModel(SystemItemImport dto);
+    SystemItem dtoToModel(SystemItemImport dto, Instant date);
 
     SystemItem entityToModel(SystemItemEntity entity);
+
+    List<SystemItemEntity> modelsToEntities(List<SystemItem> itemsToSave);
 }

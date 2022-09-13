@@ -20,7 +20,7 @@ public class SystemItem {
     @Setter(AccessLevel.NONE)
     private String parentId;
     @Setter(AccessLevel.NONE)
-    private Optional<SystemItem> parent;
+    private Optional<SystemItem> parent = Optional.empty();
     private final SystemItemType type;
     @Getter(AccessLevel.NONE)
     private Long size;
@@ -76,9 +76,16 @@ public class SystemItem {
     }
 
     public void setParent(SystemItem parent) {
-        if (parent.getType().equals(SystemItemType.FOLDER)) {
-            this.parent = Optional.of(parent);
-            this.parentId = parent.getId();
+        if (parent == null) this.parent = Optional.empty();
+        else {
+            if (parent.getType().equals(SystemItemType.FOLDER)) {
+                this.parent = Optional.of(parent);
+                this.parentId = parent.getId();
+            }
         }
+    }
+
+    public void removeChild(SystemItem child) {
+        children.remove(child.getId());
     }
 }

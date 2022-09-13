@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,20 +33,31 @@ public class SystemItemService {
         if (validator.isInvalid(request.getItems())) {
             throw new ValidationException("Request is invalid");
         }
-        ItemsHierarchy requestHierarchy = ItemsHierarchy.getBuilder().makeByImport(request.getItems(), mapper);
-        Set<String> idsFromRequest = requestHierarchy.getAllIds();
+//        ItemsHierarchy requestHierarchy = ItemsHierarchy.getBuilder().makeByImport(request.getItems(), request.getUpdateDate(), mapper);
+//        Set<String> idsFromRequest = requestHierarchy.getAllIds();
+        //remove above
+        Set<String> idsFromRequest = new HashSet<>(request.getItems().size() * 2);
+        Map<String, SystemItem> itemsFromReq = request.getItems()
+                .stream()
+                .peek(itemImport -> {
+                    if (itemImport.getParentId() != null) idsFromRequest.add(itemImport.getParentId());
+                    idsFromRequest.add(itemImport.getId());
+                })
+                .collect(Collectors.toMap(SystemItemImport::getId, dto -> mapper.dtoToModel(dto, request.getUpdateDate())));
         ItemsHierarchy existing = ItemsHierarchy
-                        .getBuilder()
-                        .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
-        existing.addAll(requestHierarchy);
-        repository.saveAll(existing.getAllEntities());
-//        Map<String, Optional<SystemItemImport>> idsFromRequest = getIdsFromRequest(request);
-//        List<SystemItemRepository.LeveledSystemItemEntity> allElementsInTreeByIds
-//                = repository.findAllElementsInTreeByIds(idsFromRequest.keySet());
-//        Map<String, SystemItemEntity> existingEntities = repository.findAllById(idsFromRequest.keySet()).stream()
-//                .collect(Collectors.toMap(SystemItemEntity::getId, Function.identity()));
-//        List<SystemItemEntity> entitiesToSave = getEntitiesToSave(request, idsFromRequest, existingEntities);
-//        repository.saveAll(entitiesToSave);
+                .getBuilder()
+                .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
+        existing.addAll(itemsFromReq);
+        List<SystemItem> itemsToSave = existing.getAll();
+        repository.saveAll(mapper.modelsToEntities(itemsToSave));
+        //1st iteration
+//        ItemsHierarchy requestHierarchy = ItemsHierarchy.getBuilder().makeByImport(request.getItems(), request.getUpdateDate(), mapper);
+//        Set<String> idsFromRequest = requestHierarchy.getAllIds();
+//        ItemsHierarchy existing = ItemsHierarchy
+//                        .getBuilder()
+//                        .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
+//        existing.addAll(requestHierarchy);
+//        repository.saveAll(existing.getAllEntities());
     }
 
     //Deletion of nested items is implemented by a stored procedure in the db

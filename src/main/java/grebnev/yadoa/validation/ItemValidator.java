@@ -15,7 +15,7 @@ public class ItemValidator {
     public boolean isInvalid(List<SystemItemImport> items) {
         if (isRecurringId(items)) return true;
         for (SystemItemImport anImport : items) {
-            if (!isItemInvalid(anImport)) return true;
+            if (isItemInvalid(anImport)) return true;
         }
         return false;
     }
@@ -52,7 +52,7 @@ public class ItemValidator {
     private boolean isInvalidFolder(SystemItemImport systemItemImport) {
         Long size = systemItemImport.getSize();
         String url = systemItemImport.getUrl();
-        return size != null && url != null;
+        return size != null || url != null;
     }
 }
 
