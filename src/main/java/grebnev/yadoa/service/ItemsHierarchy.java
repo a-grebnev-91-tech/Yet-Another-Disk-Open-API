@@ -1,18 +1,15 @@
 package grebnev.yadoa.service;
 
-import grebnev.yadoa.controller.dto.SystemItemImport;
 import grebnev.yadoa.mapper.SystemItemMapper;
 import grebnev.yadoa.repository.entity.SystemItemEntity;
 import grebnev.yadoa.service.model.SystemItem;
 import grebnev.yadoa.service.model.SystemItemType;
 
 import javax.validation.ValidationException;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ItemsHierarchy {
-    private final Map<String, SystemItem> rootsByLeafId;
     private final Map<String, SystemItem> leavesById;
     private final Map<String, SystemItem> rootsById;
 
@@ -21,7 +18,6 @@ public class ItemsHierarchy {
             Map<String, SystemItem> leavesById,
             Map<String, SystemItem> rootsById
     ) {
-        this.rootsByLeafId = rootsByLeafId;
         this.leavesById = leavesById;
         this.rootsById = rootsById;
     }
@@ -141,19 +137,6 @@ public class ItemsHierarchy {
             return getItemsHierarchy(itemMap);
         }
 
-        public ItemsHierarchy makeByImport(List<SystemItemImport> itemsImport, Instant date, SystemItemMapper mapper) {
-//            Map<String, SystemItem> itemMap = new HashMap<>(itemsImport.size());
-//            for (SystemItemImport itemImport : itemsImport) {
-//                SystemItem item = mapper.dtoToModel(itemImport);
-//                String id = item.getId();
-//                itemMap.put(id, item);
-//            }
-            Map<String, SystemItem> itemMap = itemsImport
-                    .stream()
-                    .collect(Collectors.toMap(SystemItemImport::getId, dto -> mapper.dtoToModel(dto, date)));
-            return getItemsHierarchy(itemMap);
-        }
-
         private ItemsHierarchy getItemsHierarchy(Map<String, SystemItem> itemMap) {
             Map<String, SystemItem> rootsById = findRoots(itemMap);
             Map<String, SystemItem> leavesById = new HashMap<>(itemMap.size());
@@ -187,18 +170,6 @@ public class ItemsHierarchy {
             }
         }
 
-        private String getRootByItem(SystemItem curLeaf, Map<String, SystemItem> rootsById) {
-            String parentId = curLeaf.getParentId();
-            if (rootsById.containsKey(parentId)) return parentId;
-            else return getRootByItem(curLeaf.getParent().get(), rootsById);
-        }
-
-        private void makeConnection(SystemItem parent, SystemItem child) {
-            if (parent.getType().equals(SystemItemType.FILE)) throw new ValidationException("File couldn't be parent");
-            child.setParent(parent);
-            parent.addChild(child);
-        }
-
         private Map<String, SystemItem> findRoots(Map<String, SystemItem> itemMap) {
             Map<String, SystemItem> resultMap = new HashMap<>(itemMap.size());
             Set<String> idsToRemove = new HashSet<>();
@@ -212,6 +183,18 @@ public class ItemsHierarchy {
             }
             itemMap.entrySet().removeIf(entry -> idsToRemove.contains(entry.getKey()));
             return resultMap;
+        }
+
+        private String getRootByItem(SystemItem curLeaf, Map<String, SystemItem> rootsById) {
+            String parentId = curLeaf.getParentId();
+            if (rootsById.containsKey(parentId)) return parentId;
+            else return getRootByItem(curLeaf.getParent().get(), rootsById);
+        }
+
+        private void makeConnection(SystemItem parent, SystemItem child) {
+            if (parent.getType().equals(SystemItemType.FILE)) throw new ValidationException("File couldn't be parent");
+            child.setParent(parent);
+            parent.addChild(child);
         }
     }
 }
