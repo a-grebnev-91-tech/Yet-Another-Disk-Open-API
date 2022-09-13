@@ -6,6 +6,7 @@ import grebnev.yadoa.service.model.SystemItem;
 import grebnev.yadoa.service.model.SystemItemType;
 
 import javax.validation.ValidationException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,6 @@ public class ItemsHierarchy {
     private final Map<String, SystemItem> rootsById;
 
     private ItemsHierarchy(
-            Map<String, SystemItem> rootsByLeafId,
             Map<String, SystemItem> leavesById,
             Map<String, SystemItem> rootsById
     ) {
@@ -22,8 +22,22 @@ public class ItemsHierarchy {
         this.rootsById = rootsById;
     }
 
-    public static HierarchyFactory getBuilder() {
-        return new HierarchyFactory();
+    public static HierarchyMaker getMaker() {
+        return new HierarchyMaker();
+    }
+
+    public void deleteById(String id, Instant date) {
+        Optional<SystemItem> maybeExisting = getExisting(id);
+        if (maybeExisting.isPresent()) {
+            SystemItem existing = maybeExisting.get();
+            Optional<SystemItem> parent = existing.getParent();
+            parent.ifPresent(systemItem -> {
+                systemItem.setDate(date);
+                systemItem.removeChild(existing);
+            });
+            rootsById.remove(id);
+            leavesById.remove(id);
+        }
     }
 
     public List<SystemItem> getAll() {
@@ -33,6 +47,7 @@ public class ItemsHierarchy {
         return result;
     }
 
+    //todo remove
     public Set<String> getAllIds() {
         Set<String> ids = new HashSet<>(rootsById.size() + leavesById.size());
         ids.addAll(rootsById.keySet());
@@ -44,12 +59,12 @@ public class ItemsHierarchy {
         for (Map.Entry<String, SystemItem> entry : itemsFromReq.entrySet()) {
             String newId = entry.getKey();
             SystemItem newItem = entry.getValue();
-            Optional<SystemItem> existed = getExisted(newId);
-            if (existed.isPresent()) {
-                validateExistedOrThrow(newItem, existed.get(), itemsFromReq);
-                updateExisted(existed.get(), newItem);
-                if (parentIsChanged(newItem, existed.get())) {
-                    move(existed.get(), newItem, itemsFromReq);
+            Optional<SystemItem> existing = getExisting(newId);
+            if (existing.isPresent()) {
+                validateExistingOrThrow(newItem, existing.get(), itemsFromReq);
+                updateExisting(existing.get(), newItem);
+                if (parentIsChanged(newItem, existing.get())) {
+                    move(existing.get(), newItem, itemsFromReq);
                 }
             } else {
                 if (newItem.getParentId() == null) {
@@ -67,67 +82,67 @@ public class ItemsHierarchy {
         assignParent(newItem, newItem, itemsFromReq);
     }
 
-    private void move(SystemItem existed, SystemItem newItem, Map<String, SystemItem> itemsFromReq) {
-        Optional<SystemItem> oldParent = existed.getParent();
+    private void move(SystemItem existing, SystemItem newItem, Map<String, SystemItem> itemsFromReq) {
+        Optional<SystemItem> oldParent = existing.getParent();
         if (oldParent.isPresent()) {
-            oldParent.get().removeChild(existed);
-            oldParent.get().setDate(existed.getDate());
+            oldParent.get().removeChild(existing);
+            oldParent.get().setDate(existing.getDate());
         }
-        oldParent.ifPresent(systemItem -> systemItem.removeChild(existed));
+        oldParent.ifPresent(systemItem -> systemItem.removeChild(existing));
         if (newItem.getParentId() == null) {
-            existed.setParent(null);
-            rootsById.put(existed.getId(), existed);
+            existing.setParent(null);
+            rootsById.put(existing.getId(), existing);
         } else {
-            assignParent(existed, newItem, itemsFromReq);
+            assignParent(existing, newItem, itemsFromReq);
         }
     }
 
-    private void assignParent(SystemItem existed, SystemItem newItem, Map<String, SystemItem> itemsFromReq) {
-        Optional<SystemItem> maybeNewParent = getExisted(newItem.getParentId());
+    private void assignParent(SystemItem existing, SystemItem newItem, Map<String, SystemItem> itemsFromReq) {
+        Optional<SystemItem> maybeNewParent = getExisting(newItem.getParentId());
         SystemItem newParent;
         if (maybeNewParent.isEmpty()) {
             newParent = itemsFromReq.get(newItem.getParentId());
         } else {
             newParent = maybeNewParent.get();
         }
-        newParent.addChild(existed);
-        existed.setParent(newParent);
+        newParent.addChild(existing);
+        existing.setParent(newParent);
     }
 
-    private void updateExisted(SystemItem existed, SystemItem newItem) {
-        existed.setDate(newItem.getDate());
-        existed.setSize(newItem.getSize());
-        existed.setUrl(newItem.getUrl());
+    private void updateExisting(SystemItem existing, SystemItem newItem) {
+        existing.setDate(newItem.getDate());
+        existing.setSize(newItem.getSize());
+        existing.setUrl(newItem.getUrl());
     }
 
-    private boolean parentIsChanged(SystemItem newItem, SystemItem existed) {
-        return !Objects.equals(newItem.getParentId(), existed.getParentId());
+    private boolean parentIsChanged(SystemItem newItem, SystemItem existing) {
+        return !Objects.equals(newItem.getParentId(), existing.getParentId());
     }
 
-    private void validateExistedOrThrow(SystemItem newItem, SystemItem existed, Map<String, SystemItem> itemsFromReq) {
-        if (newItem.getType() != existed.getType()) throw new ValidationException("Type could not be changed");
+    private void validateExistingOrThrow(SystemItem newItem, SystemItem existing, Map<String, SystemItem> itemsFromReq) {
+        if (newItem.getType() != existing.getType()) throw new ValidationException("Type could not be changed");
         if (newItem.getParentId() == null) return;
         String newParentId = newItem.getParentId();
-        if (Objects.equals(newParentId, existed.getParentId())) return;
+        if (Objects.equals(newParentId, existing.getParentId())) return;
         checkParentOrThrow(itemsFromReq, newParentId);
     }
 
     private void checkParentOrThrow(Map<String, SystemItem> itemsFromReq, String newParentId) {
-        Optional<SystemItem> maybeParent = getExisted(newParentId);
+        Optional<SystemItem> maybeParent = getExisting(newParentId);
         if (maybeParent.isEmpty()) maybeParent = Optional.ofNullable(itemsFromReq.get(newParentId));
         if (maybeParent.isEmpty()) throw new ValidationException("Parent for item isn't exist");
         if (SystemItemType.FILE.equals(maybeParent.get().getType()))
             throw new ValidationException("File could not be parent");
     }
 
-    private Optional<SystemItem> getExisted(String id) {
+    private Optional<SystemItem> getExisting(String id) {
         SystemItem result = rootsById.get(id);
         if (result == null) result = leavesById.get(id);
         return Optional.ofNullable(result);
     }
 
-    public static class HierarchyFactory {
-        private HierarchyFactory() {
+    public static class HierarchyMaker {
+        private HierarchyMaker() {
         }
 
         public ItemsHierarchy makeByEntities(List<SystemItemEntity> allElementsInTreeByIds, SystemItemMapper mapper) {
@@ -142,7 +157,7 @@ public class ItemsHierarchy {
             Map<String, SystemItem> leavesById = new HashMap<>(itemMap.size());
             Map<String, SystemItem> rootsByLeafId = new HashMap<>(itemMap.size());
             initLeavesMaps(itemMap, rootsById, leavesById, rootsByLeafId);
-            return new ItemsHierarchy(rootsByLeafId, leavesById, rootsById);
+            return new ItemsHierarchy(leavesById, rootsById);
         }
 
         private void initLeavesMaps(

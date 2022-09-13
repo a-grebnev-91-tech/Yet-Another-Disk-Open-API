@@ -41,7 +41,7 @@ public class SystemItemService {
                 })
                 .collect(Collectors.toMap(SystemItemImport::getId, dto -> mapper.dtoToModel(dto, request.getUpdateDate())));
         ItemsHierarchy existing = ItemsHierarchy
-                .getBuilder()
+                .getMaker()
                 .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
         existing.addAll(itemsFromReq);
         List<SystemItem> itemsToSave = existing.getAll();
@@ -51,12 +51,18 @@ public class SystemItemService {
     //Deletion of nested items is implemented by a stored procedure in the db
     @Transactional
     public void delete(String id, Instant date) {
-        Optional<SystemItemEntity> maybeParent = findParentById(id);
+        Optional<SystemItemEntity> maybeEntity = repository.findById(id);
+        throwIfNotFound(id, maybeEntity);
+        ItemsHierarchy existing =
+                ItemsHierarchy.getMaker().makeByEntities(repository.findAllElementsInTreeByIds(List.of(id)), mapper);
+        existing.deleteById(id, date);
         repository.deleteById(id);
-        if (maybeParent.isPresent()) {
-            maybeParent.get().setDate(date);
-            repository.save(maybeParent.get());
-        }
+        List<SystemItem> entities = existing.getAll();
+        repository.saveAll(mapper.modelsToEntities(entities));
+    }
+
+    private void throwIfNotFound(String id, Optional<SystemItemEntity> existing) {
+        if (existing.isEmpty()) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
     }
 
     public List<SystemItemExport> findLastUpdated(Instant to) {
