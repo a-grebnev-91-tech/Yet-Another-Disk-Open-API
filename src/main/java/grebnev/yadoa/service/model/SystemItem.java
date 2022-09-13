@@ -1,4 +1,4 @@
-package grebnev.yadoa.model;
+package grebnev.yadoa.service.model;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -18,7 +18,9 @@ public class SystemItem {
     @Getter(AccessLevel.NONE)
     private Instant date;
     @Setter(AccessLevel.NONE)
-    private SystemItem parent;
+    private String parentId;
+    @Setter(AccessLevel.NONE)
+    private Optional<SystemItem> parent;
     private final SystemItemType type;
     @Getter(AccessLevel.NONE)
     private Long size;
@@ -69,9 +71,14 @@ public class SystemItem {
         }
     }
 
+    public void setParentId(String parentId) {
+        if (this.parent.isEmpty()) this.parentId = parentId;
+    }
+
     public void setParent(SystemItem parent) {
         if (parent.getType().equals(SystemItemType.FOLDER)) {
-            this.parent = parent;
+            this.parent = Optional.of(parent);
+            this.parentId = parent.getId();
         }
     }
 }

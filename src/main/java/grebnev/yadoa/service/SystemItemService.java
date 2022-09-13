@@ -1,15 +1,16 @@
 package grebnev.yadoa.service;
 
-import grebnev.yadoa.dto.SystemItemExport;
-import grebnev.yadoa.dto.SystemItemImport;
-import grebnev.yadoa.dto.SystemItemImportRequest;
+import grebnev.yadoa.controller.dto.SystemItemExport;
+import grebnev.yadoa.controller.dto.SystemItemImport;
+import grebnev.yadoa.controller.dto.SystemItemImportRequest;
 import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import grebnev.yadoa.mapper.SystemItemMapper;
-import grebnev.yadoa.model.SystemItem;
-import grebnev.yadoa.model.SystemItemType;
-import grebnev.yadoa.entity.SystemItemEntity;
+import grebnev.yadoa.service.model.SystemItem;
+import grebnev.yadoa.service.model.SystemItemType;
+import grebnev.yadoa.repository.entity.SystemItemEntity;
 import grebnev.yadoa.repository.SystemItemRepository;
+import grebnev.yadoa.validation.ItemValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +25,27 @@ public class SystemItemService {
     private final SystemItemRepository repository;
     private final SystemItemMapper mapper;
     private final HierarchyMakerMapper hierarchyMakerMapper;
+    private final ItemValidator validator;
 
     @Transactional
     public void add(SystemItemImportRequest request) {
-        Map<String, Optional<SystemItemImport>> idsFromRequest = getIdsFromRequest(request);
-        Map<String, SystemItemEntity> existingEntities = repository.findAllById(idsFromRequest.keySet()).stream()
-                .collect(Collectors.toMap(SystemItemEntity::getId, Function.identity()));
-        List<SystemItemEntity> entitiesToSave = getEntitiesToSave(request, idsFromRequest, existingEntities);
-        repository.saveAll(entitiesToSave);
+        if (validator.isInvalid(request.getItems())) {
+            throw new ValidationException("Request is invalid");
+        }
+        ItemsHierarchy requestHierarchy = ItemsHierarchy.getBuilder().makeByImport(request.getItems(), mapper);
+        Set<String> idsFromRequest = requestHierarchy.getAllIds();
+        ItemsHierarchy existing = ItemsHierarchy
+                        .getBuilder()
+                        .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
+        existing.addAll(requestHierarchy);
+        repository.saveAll(existing.getAllEntities());
+//        Map<String, Optional<SystemItemImport>> idsFromRequest = getIdsFromRequest(request);
+//        List<SystemItemRepository.LeveledSystemItemEntity> allElementsInTreeByIds
+//                = repository.findAllElementsInTreeByIds(idsFromRequest.keySet());
+//        Map<String, SystemItemEntity> existingEntities = repository.findAllById(idsFromRequest.keySet()).stream()
+//                .collect(Collectors.toMap(SystemItemEntity::getId, Function.identity()));
+//        List<SystemItemEntity> entitiesToSave = getEntitiesToSave(request, idsFromRequest, existingEntities);
+//        repository.saveAll(entitiesToSave);
     }
 
     //Deletion of nested items is implemented by a stored procedure in the db

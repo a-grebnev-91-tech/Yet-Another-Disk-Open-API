@@ -1,5 +1,7 @@
 package grebnev.yadoa.model;
 
+import grebnev.yadoa.service.model.SystemItem;
+import grebnev.yadoa.service.model.SystemItemType;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -7,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static grebnev.yadoa.model.SystemItemType.*;
+import static grebnev.yadoa.service.model.SystemItemType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SystemItemTest {

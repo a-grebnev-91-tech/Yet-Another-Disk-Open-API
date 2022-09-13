@@ -1,7 +1,6 @@
 package grebnev.yadoa.validation;
 
-import grebnev.yadoa.dto.SystemItemImport;
-import grebnev.yadoa.dto.SystemItemImportRequest;
+import grebnev.yadoa.controller.dto.SystemItemImport;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

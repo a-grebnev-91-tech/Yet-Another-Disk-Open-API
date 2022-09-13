@@ -1,6 +1,6 @@
 package grebnev.yadoa.validation;
 
-import grebnev.yadoa.model.SystemItemType;
+import grebnev.yadoa.service.model.SystemItemType;
 import org.apache.commons.lang3.EnumUtils;
 
 import javax.validation.ConstraintValidator;

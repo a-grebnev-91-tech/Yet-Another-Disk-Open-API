@@ -1,7 +1,7 @@
 package grebnev.yadoa.controller;
 
-import grebnev.yadoa.dto.SystemItemExport;
-import grebnev.yadoa.dto.SystemItemImportRequest;
+import grebnev.yadoa.controller.dto.SystemItemExport;
+import grebnev.yadoa.controller.dto.SystemItemImportRequest;
 import grebnev.yadoa.service.SystemItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

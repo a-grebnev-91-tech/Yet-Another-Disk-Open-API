@@ -1,6 +1,6 @@
-package grebnev.yadoa.entity;
+package grebnev.yadoa.repository.entity;
 
-import grebnev.yadoa.model.SystemItemType;
+import grebnev.yadoa.service.model.SystemItemType;
 import lombok.Getter;
 import lombok.Setter;
 

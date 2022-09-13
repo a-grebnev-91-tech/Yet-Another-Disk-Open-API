@@ -1,4 +1,4 @@
-package grebnev.yadoa.dto;
+package grebnev.yadoa.controller.dto;
 
 import grebnev.yadoa.validation.UniqueId;
 import lombok.Getter;

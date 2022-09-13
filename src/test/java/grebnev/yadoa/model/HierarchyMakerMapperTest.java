@@ -3,6 +3,7 @@ package grebnev.yadoa.model;
 import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.repository.SystemItemRepository;
 import grebnev.yadoa.mapper.HierarchyMakerMapper;
+import grebnev.yadoa.service.model.SystemItem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -11,8 +12,8 @@ import org.mockito.Mockito;
 import java.time.Instant;
 import java.util.*;
 
-import static grebnev.yadoa.model.SystemItemType.FILE;
-import static grebnev.yadoa.model.SystemItemType.FOLDER;
+import static grebnev.yadoa.service.model.SystemItemType.FILE;
+import static grebnev.yadoa.service.model.SystemItemType.FOLDER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

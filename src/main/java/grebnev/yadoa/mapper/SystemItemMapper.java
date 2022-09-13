@@ -1,9 +1,9 @@
 package grebnev.yadoa.mapper;
 
-import grebnev.yadoa.dto.SystemItemExport;
-import grebnev.yadoa.dto.SystemItemImport;
-import grebnev.yadoa.entity.SystemItemEntity;
-import grebnev.yadoa.model.SystemItem;
+import grebnev.yadoa.controller.dto.SystemItemExport;
+import grebnev.yadoa.controller.dto.SystemItemImport;
+import grebnev.yadoa.repository.entity.SystemItemEntity;
+import grebnev.yadoa.service.model.SystemItem;
 import org.mapstruct.*;
 
 import java.time.Instant;
@@ -17,7 +17,8 @@ public interface SystemItemMapper {
 
     List<SystemItemExport> filesToDto(List<SystemItemEntity> files);
 
-    @Mapping(source = "parent", target = "parentId")
+    //todo remove
+//    @Mapping(source = "parent", target = "parentId")
     SystemItemExport modelToDto(SystemItem model);
 
     //todo remove?
@@ -29,4 +30,8 @@ public interface SystemItemMapper {
             SystemItemImport dto,
             Instant updateDate
     );
+
+    SystemItem dtoToModel(SystemItemImport dto);
+
+    SystemItem entityToModel(SystemItemEntity entity);
 }

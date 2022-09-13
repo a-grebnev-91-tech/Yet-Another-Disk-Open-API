@@ -1,7 +1,7 @@
 package grebnev.yadoa.mapper;
 
 import grebnev.yadoa.exception.NotFoundException;
-import grebnev.yadoa.model.SystemItem;
+import grebnev.yadoa.service.model.SystemItem;
 import grebnev.yadoa.repository.SystemItemRepository;
 import org.springframework.stereotype.Component;
 
