@@ -73,6 +73,10 @@ public class ItemsHierarchy {
 
     private void move(SystemItem existed, SystemItem newItem, Map<String, SystemItem> itemsFromReq) {
         Optional<SystemItem> oldParent = existed.getParent();
+        if (oldParent.isPresent()) {
+            oldParent.get().removeChild(existed);
+            oldParent.get().setDate(existed.getDate());
+        }
         oldParent.ifPresent(systemItem -> systemItem.removeChild(existed));
         if (newItem.getParentId() == null) {
             existed.setParent(null);

@@ -76,8 +76,10 @@ public class SystemItem {
     }
 
     public void setParent(SystemItem parent) {
-        if (parent == null) this.parent = Optional.empty();
-        else {
+        if (parent == null) {
+            this.parent = Optional.empty();
+            this.parentId = null;
+        } else {
             if (parent.getType().equals(SystemItemType.FOLDER)) {
                 this.parent = Optional.of(parent);
                 this.parentId = parent.getId();
