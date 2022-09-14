@@ -1,8 +1,8 @@
 package grebnev.yadoa.mapper;
 
-import grebnev.yadoa.dto.SystemItemExport;
-import grebnev.yadoa.model.SystemItem;
-import grebnev.yadoa.model.SystemItemType;
+import grebnev.yadoa.controller.dto.SystemItemExport;
+import grebnev.yadoa.service.model.SystemItem;
+import grebnev.yadoa.service.model.SystemItemType;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +30,5 @@ public class SystemItemReferenceMapper {
             exports.add(dto);
         }
         return exports;
-    }
-
-    String modelToId(SystemItem model) {
-        if (model == null) return null;
-        return model.getId();
     }
 }
