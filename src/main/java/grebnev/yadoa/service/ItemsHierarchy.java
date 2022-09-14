@@ -26,7 +26,7 @@ public class ItemsHierarchy {
         return new HierarchyMaker();
     }
 
-    public void deleteById(String id, Instant date) {
+    public List<String> deleteById(String id, Instant date) {
         Optional<SystemItem> maybeExisting = getExisting(id);
         if (maybeExisting.isPresent()) {
             SystemItem existing = maybeExisting.get();
@@ -35,9 +35,25 @@ public class ItemsHierarchy {
                 systemItem.setDate(date);
                 systemItem.removeChild(existing);
             });
+            List<String> idsToDelete = getIdsToDelete(existing.getChildren());
+            idsToDelete.add(id);
             rootsById.remove(id);
-            leavesById.remove(id);
+            idsToDelete.forEach(leavesById.keySet()::remove);
+            return idsToDelete;
+        } else {
+            return Collections.emptyList();
         }
+    }
+
+    private List<String> getIdsToDelete(Map<String, SystemItem> children) {
+        List<String> idsToDelete = new ArrayList<>();
+        if (children != null && !children.isEmpty()) {
+            for (SystemItem child : children.values()) {
+                idsToDelete.addAll(getIdsToDelete(child.getChildren()));
+            }
+            idsToDelete.addAll(children.keySet());
+        }
+        return idsToDelete;
     }
 
     public List<SystemItem> getAll() {

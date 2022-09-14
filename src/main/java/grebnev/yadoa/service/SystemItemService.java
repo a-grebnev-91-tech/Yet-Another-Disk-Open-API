@@ -1,11 +1,11 @@
 package grebnev.yadoa.service;
 
-import grebnev.yadoa.controller.dto.SystemItemExport;
-import grebnev.yadoa.controller.dto.SystemItemImport;
-import grebnev.yadoa.controller.dto.SystemItemImportRequest;
+import grebnev.yadoa.controller.dto.*;
 import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import grebnev.yadoa.mapper.SystemItemMapper;
+import grebnev.yadoa.repository.HistoryRepository;
+import grebnev.yadoa.repository.entity.SystemItemHistoryEntity;
 import grebnev.yadoa.service.model.SystemItem;
 import grebnev.yadoa.repository.entity.SystemItemEntity;
 import grebnev.yadoa.repository.SystemItemRepository;
@@ -16,18 +16,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class SystemItemService {
-    private final SystemItemRepository repository;
+    private final SystemItemRepository itemRepository;
+    private final HistoryRepository historyRepository;
     private final SystemItemMapper mapper;
     private final HierarchyMakerMapper hierarchyMakerMapper;
     private final ItemValidator validator;
 
-    @Transactional
     public void add(SystemItemImportRequest request) {
         if (validator.isInvalid(request.getItems())) {
             throw new ValidationException("Request is invalid");
@@ -42,48 +46,71 @@ public class SystemItemService {
                 .collect(Collectors.toMap(SystemItemImport::getId, dto -> mapper.dtoToModel(dto, request.getUpdateDate())));
         ItemsHierarchy existing = ItemsHierarchy
                 .getMaker()
-                .makeByEntities(repository.findAllElementsInTreeByIds(idsFromRequest), mapper);
+                .makeByEntities(itemRepository.findAllElementsInTreeByIds(idsFromRequest), mapper);
         existing.addAll(itemsFromReq);
         List<SystemItem> itemsToSave = existing.getAll();
-        repository.saveAll(mapper.modelsToEntities(itemsToSave));
+        itemRepository.saveAll(mapper.modelsToEntities(itemsToSave));
     }
 
-    //Deletion of nested items is implemented by a stored procedure in the db
-    @Transactional
     public void delete(String id, Instant date) {
-        Optional<SystemItemEntity> maybeEntity = repository.findById(id);
+        Optional<SystemItemEntity> maybeEntity = itemRepository.findById(id);
         throwIfNotFound(id, maybeEntity);
         ItemsHierarchy existing =
-                ItemsHierarchy.getMaker().makeByEntities(repository.findAllElementsInTreeByIds(List.of(id)), mapper);
-        existing.deleteById(id, date);
-        repository.deleteById(id);
+                ItemsHierarchy.getMaker().makeByEntities(itemRepository.findAllElementsInTreeByIds(List.of(id)), mapper);
+        List<String> idsToDelete = existing.deleteById(id, date);
+        itemRepository.deleteAllById(idsToDelete);
         List<SystemItem> entities = existing.getAll();
-        repository.saveAll(mapper.modelsToEntities(entities));
+        itemRepository.saveAll(mapper.modelsToEntities(entities));
+    }
+
+    public SystemItemExport findById(String id) {
+        List<SystemItemRepository.LeveledSystemItemEntity> items = itemRepository.findAllElementsByRoot(id);
+        if (items.size() == 0) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
+        SystemItem root = hierarchyMakerMapper.getHierarchy(items);
+        return mapper.modelToDto(root);
+    }
+
+    public SystemItemHistoryResponse findHistory(String id, Instant dateStart, Instant dateEnd) {
+        Optional<SystemItemEntity> maybeItem = itemRepository.findById(id);
+        throwIfNotFound(id, maybeItem);
+        List<SystemItemHistoryEntity> historyElements;
+        if (dateStart == null) {
+            dateStart = Instant.ofEpochMilli(0);
+        }
+        if (dateEnd == null) {
+            historyElements = historyRepository.findHistoryByItemId(id, dateStart);
+        } else {
+            historyElements = historyRepository.findHistoryByItemId(id, dateStart, dateEnd);
+        }
+        List<SystemItemHistoryUnit> historyUnits =  historyElements
+                .stream()
+                .map(mapper::historyEntityToHistoryUnit)
+                .collect(Collectors.toList());
+        return new SystemItemHistoryResponse(historyUnits);
+    }
+
+    public SystemItemHistoryResponse findLastUpdated(Instant to) {
+        int secondsInDay = 24 * 60 * 60;
+        Instant from = to.minusSeconds(secondsInDay);
+        List<SystemItemEntity> entities = itemRepository.findLastUpdated(from, to);
+        List<SystemItemHistoryUnit> historyUnits =  entities
+                .stream()
+                .map(mapper::entityToHistoryUnit)
+                .collect(Collectors.toList());
+        return new SystemItemHistoryResponse(historyUnits);
     }
 
     private void throwIfNotFound(String id, Optional<SystemItemEntity> existing) {
         if (existing.isEmpty()) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
     }
 
-    public List<SystemItemExport> findLastUpdated(Instant to) {
-        int secondsInDay = 24 * 60 * 60;
-        Instant from = to.minusSeconds(secondsInDay);
-        return mapper.filesToDto(repository.findLastUpdated(from, to));
-    }
-
-    public SystemItemExport findById(String id) {
-        List<SystemItemRepository.LeveledSystemItemEntity> items = repository.findAllElementsByRoot(id);
-        if (items.size() == 0) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
-        SystemItem root = hierarchyMakerMapper.getHierarchy(items);
-        return mapper.modelToDto(root);
-    }
-
+    //todo remove
     private Optional<SystemItemEntity> findParentById(String childId) {
-        Optional<SystemItemEntity> maybeChild = repository.findById(childId);
+        Optional<SystemItemEntity> maybeChild = itemRepository.findById(childId);
         if (maybeChild.isPresent()) {
             String parentId = maybeChild.get().getParentId();
             if (parentId != null) {
-                return repository.findById(parentId);
+                return itemRepository.findById(parentId);
             } else {
                 return Optional.empty();
             }

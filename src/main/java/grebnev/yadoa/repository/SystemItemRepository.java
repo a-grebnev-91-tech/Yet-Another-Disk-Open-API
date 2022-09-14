@@ -1,6 +1,7 @@
 package grebnev.yadoa.repository;
 
 import grebnev.yadoa.repository.entity.SystemItemEntity;
+import grebnev.yadoa.repository.entity.SystemItemHistoryEntity;
 import grebnev.yadoa.service.model.SystemItemType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

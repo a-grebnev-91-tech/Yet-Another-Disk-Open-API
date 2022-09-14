@@ -1,6 +1,7 @@
 package grebnev.yadoa.controller;
 
 import grebnev.yadoa.controller.dto.SystemItemExport;
+import grebnev.yadoa.controller.dto.SystemItemHistoryResponse;
 import grebnev.yadoa.controller.dto.SystemItemImportRequest;
 import grebnev.yadoa.service.SystemItemService;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,21 @@ public class SystemItemController {
         return service.findById(id);
     }
 
+    ///node/{id}/history:
+    @GetMapping("/node/{id}")
+    public SystemItemHistoryResponse findHistoryByItem(
+            @PathVariable("id") String id,
+            @RequestParam(value = "dateStart", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateStart,
+            @RequestParam(value = "dateEnd", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateEnd
+    ) {
+        log.info("Trying to get history by item id {}", id);
+        return service.findHistory(id, dateStart, dateEnd);
+    }
+
     @GetMapping("/updates")
-    public List<SystemItemExport> findLastUpdated(@RequestParam("date") Instant date) {
+    public SystemItemHistoryResponse findLastUpdated(@RequestParam("date") Instant date) {
         log.info("Trying to get items updated last 24 hours before {}", date);
         return service.findLastUpdated(date);
     }
