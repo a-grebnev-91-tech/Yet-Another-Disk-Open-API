@@ -18,7 +18,17 @@ services:
     restart: always
     container_name: "java-app"
     ports:
-      - "80:80"
+      - "80:8080"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url"  : "jdbc:postgresql://postgres:$POSTGRES_DOCKER_PORT/$POSTGRES_DB",
+        "spring.datasource.username" : "$POSTGRES_USER",
+        "spring.datasource.password" : "", 
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+        "spring.jpa.hibernate.ddl-auto" : "none",
+        "spring.sql.init.mode" : "always",
+        "spring.datasource.driver-class-name" : "org.postgresql.Driver"
+      }'
     volumes:
       - .m2:/root/.m2
 
