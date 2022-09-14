@@ -63,7 +63,6 @@ public class SystemItem {
         if (this.type.equals(SystemItemType.FILE)) {
             return size;
         } else {
-            String id = this.getId();
             return children.values().stream()
                     .map(SystemItem::getSize)
                     .filter(Objects::nonNull)

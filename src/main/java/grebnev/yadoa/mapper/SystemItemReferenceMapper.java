@@ -31,9 +31,4 @@ public class SystemItemReferenceMapper {
         }
         return exports;
     }
-
-    String modelToId(SystemItem model) {
-        if (model == null) return null;
-        return model.getId();
-    }
 }
