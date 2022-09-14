@@ -1,5 +1,6 @@
 package grebnev.yadoa.service;
 
+import grebnev.yadoa.exception.NotFoundException;
 import grebnev.yadoa.mapper.SystemItemMapper;
 import grebnev.yadoa.repository.entity.SystemItemEntity;
 import grebnev.yadoa.service.model.SystemItem;
@@ -26,51 +27,6 @@ public class ItemsHierarchy {
         return new HierarchyMaker();
     }
 
-    public List<String> deleteById(String id, Instant date) {
-        Optional<SystemItem> maybeExisting = getExisting(id);
-        if (maybeExisting.isPresent()) {
-            SystemItem existing = maybeExisting.get();
-            Optional<SystemItem> parent = existing.getParent();
-            parent.ifPresent(systemItem -> {
-                systemItem.setDate(date);
-                systemItem.removeChild(existing);
-            });
-            List<String> idsToDelete = getIdsToDelete(existing.getChildren());
-            idsToDelete.add(id);
-            rootsById.remove(id);
-            idsToDelete.forEach(leavesById.keySet()::remove);
-            return idsToDelete;
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    private List<String> getIdsToDelete(Map<String, SystemItem> children) {
-        List<String> idsToDelete = new ArrayList<>();
-        if (children != null && !children.isEmpty()) {
-            for (SystemItem child : children.values()) {
-                idsToDelete.addAll(getIdsToDelete(child.getChildren()));
-            }
-            idsToDelete.addAll(children.keySet());
-        }
-        return idsToDelete;
-    }
-
-    public List<SystemItem> getAll() {
-        List<SystemItem> result = new ArrayList<>(rootsById.size() + leavesById.size());
-        result.addAll(rootsById.values());
-        result.addAll(leavesById.values());
-        return result;
-    }
-
-    //todo remove
-    public Set<String> getAllIds() {
-        Set<String> ids = new HashSet<>(rootsById.size() + leavesById.size());
-        ids.addAll(rootsById.keySet());
-        ids.addAll(leavesById.keySet());
-        return ids;
-    }
-
     public void addAll(Map<String, SystemItem> itemsFromReq) {
         for (Map.Entry<String, SystemItem> entry : itemsFromReq.entrySet()) {
             String newId = entry.getKey();
@@ -92,6 +48,49 @@ public class ItemsHierarchy {
                 }
             }
         }
+    }
+
+    public List<String> deleteById(String id, Instant date) {
+        Optional<SystemItem> maybeExisting = getExisting(id);
+        if (maybeExisting.isPresent()) {
+            SystemItem existing = maybeExisting.get();
+            Optional<SystemItem> parent = existing.getParent();
+            parent.ifPresent(systemItem -> {
+                systemItem.setDate(date);
+                systemItem.removeChild(existing);
+            });
+            List<String> idsToDelete = getIdsToDelete(existing.getChildren());
+            idsToDelete.add(id);
+            rootsById.remove(id);
+            idsToDelete.forEach(leavesById.keySet()::remove);
+            return idsToDelete;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public List<SystemItem> getAll() {
+        List<SystemItem> result = new ArrayList<>(rootsById.size() + leavesById.size());
+        result.addAll(rootsById.values());
+        result.addAll(leavesById.values());
+        return result;
+    }
+
+    private List<String> getIdsToDelete(Map<String, SystemItem> children) {
+        List<String> idsToDelete = new ArrayList<>();
+        if (children != null && !children.isEmpty()) {
+            for (SystemItem child : children.values()) {
+                idsToDelete.addAll(getIdsToDelete(child.getChildren()));
+            }
+            idsToDelete.addAll(children.keySet());
+        }
+        return idsToDelete;
+    }
+
+    public SystemItem getRootById(String id) {
+        SystemItem root = rootsById.get(id);
+        if (root == null) throw new NotFoundException(String.format("There are no item with id %s", id));
+        return root;
     }
 
     private void assignParent(SystemItem newItem, Map<String, SystemItem> itemsFromReq) {

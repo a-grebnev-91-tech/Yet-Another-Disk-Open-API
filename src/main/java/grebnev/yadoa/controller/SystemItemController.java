@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -39,8 +38,7 @@ public class SystemItemController {
         return service.findById(id);
     }
 
-    ///node/{id}/history:
-    @GetMapping("/node/{id}")
+    @GetMapping("/node/{id}/history")
     public SystemItemHistoryResponse findHistoryByItem(
             @PathVariable("id") String id,
             @RequestParam(value = "dateStart", required = false)

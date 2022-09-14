@@ -2,7 +2,6 @@ package grebnev.yadoa.service;
 
 import grebnev.yadoa.controller.dto.*;
 import grebnev.yadoa.exception.NotFoundException;
-import grebnev.yadoa.mapper.HierarchyMakerMapper;
 import grebnev.yadoa.mapper.SystemItemMapper;
 import grebnev.yadoa.repository.HistoryRepository;
 import grebnev.yadoa.repository.entity.SystemItemHistoryEntity;
@@ -16,9 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +25,6 @@ public class SystemItemService {
     private final SystemItemRepository itemRepository;
     private final HistoryRepository historyRepository;
     private final SystemItemMapper mapper;
-    private final HierarchyMakerMapper hierarchyMakerMapper;
     private final ItemValidator validator;
 
     public void add(SystemItemImportRequest request) {
@@ -64,10 +59,10 @@ public class SystemItemService {
     }
 
     public SystemItemExport findById(String id) {
-        List<SystemItemRepository.LeveledSystemItemEntity> items = itemRepository.findAllElementsByRoot(id);
-        if (items.size() == 0) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
-        SystemItem root = hierarchyMakerMapper.getHierarchy(items);
-        return mapper.modelToDto(root);
+        List<SystemItemEntity> itemsFromRepo = itemRepository.findAllElementsByRoot(id);
+        if (itemsFromRepo.isEmpty()) throwIfNotFound(id, Optional.empty());
+        ItemsHierarchy hierarchy = ItemsHierarchy.getMaker().makeByEntities(itemsFromRepo, mapper);
+        return mapper.modelToDto(hierarchy.getRootById(id));
     }
 
     public SystemItemHistoryResponse findHistory(String id, Instant dateStart, Instant dateEnd) {
@@ -102,20 +97,5 @@ public class SystemItemService {
 
     private void throwIfNotFound(String id, Optional<SystemItemEntity> existing) {
         if (existing.isEmpty()) throw new NotFoundException(String.format("Item with id %s isn't exist", id));
-    }
-
-    //todo remove
-    private Optional<SystemItemEntity> findParentById(String childId) {
-        Optional<SystemItemEntity> maybeChild = itemRepository.findById(childId);
-        if (maybeChild.isPresent()) {
-            String parentId = maybeChild.get().getParentId();
-            if (parentId != null) {
-                return itemRepository.findById(parentId);
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            throw new NotFoundException(String.format("Entity with id %s isn't exits", childId));
-        }
     }
 }
